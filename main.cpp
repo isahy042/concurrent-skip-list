@@ -1,20 +1,4 @@
-/**
- * Parallel VLSI Wire Routing via OpenMP
- * Name 1(andrew_id 1), Name 2(andrew_id 2)
- */
-
 #include "skip-list.h"
-
-#include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <chrono>
-#include <string>
-#include <vector>
-
-#include <unistd.h>
-#include <omp.h>
 
 void print_stats() {
   // int max_occupancy = 0;
@@ -96,9 +80,10 @@ int main(int argc, char *argv[]) {
   int num_threads = 1;
   char mode = '\0';
   int batch_size = 1;
+  bool verbose = false;
 
   int opt;
-  while ((opt = getopt(argc, argv, "f:n:p:m:")) != -1) {
+  while ((opt = getopt(argc, argv, "f:n:p:m:v::")) != -1) {
     switch (opt) {
       case 'f':
         input_filename = optarg;
@@ -112,8 +97,11 @@ int main(int argc, char *argv[]) {
       case 'b':
         batch_size = atoi(optarg);
         break;
+      case 'v':
+        verbose = true;
+        break;
       default:
-        std::cerr << "Usage: " << argv[0] << " -f input_filename -m mode [-n num_threads] [-b batch_size] \n";
+        std::cerr << "Usage: " << argv[0] << " -f input_filename -m mode [-n num_threads] [-b batch_size] [-v]\n";
         exit(EXIT_FAILURE);
     }
   }
@@ -121,7 +109,7 @@ int main(int argc, char *argv[]) {
   // Check if required options are provided
   if (empty(input_filename) || num_threads <= 0 || (mode != '1' && mode != '2'
                                                     && mode != '3' && mode != '4') || batch_size <= 0) {
-      std::cerr << "Usage: " << argv[0] << " -f input_filename -m mode [-n num_threads] [-b batch_size] \n";
+      std::cerr << "Usage: " << argv[0] << " -f input_filename -m mode [-n num_threads] [-b batch_size] [-v] \n";
       exit(EXIT_FAILURE);
   }
 
@@ -137,9 +125,9 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  int num_ops;
+  int num_ops, num_elements, min_val;
   /* Read the number of operations from file */
-  fin >> num_ops;
+  fin >> num_ops >> num_elements >> min_val;
 
   std::vector<Operation> operations(num_ops);
 
@@ -152,7 +140,10 @@ int main(int argc, char *argv[]) {
 
   const auto compute_start = std::chrono::steady_clock::now();
   
-  // TODO: do ops 
+  // run the operations with a checker
+  Checker* checker = new Checker(mode, num_elements, min_val, verbose);
+  checker->RunOperations(&operations);
+  checker->PrintOutcome();
 
   const double compute_time = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - compute_start).count();
   std::cout << "Computation time (sec): " << compute_time << '\n';
