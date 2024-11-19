@@ -12,6 +12,9 @@
 #include <cmath>
 #include <cassert>
 
+static bool coinflip(){
+    return (rand() & 10) >= 5; // 50 50 chance
+}
 
 /* a single skip list operation */ 
 struct Operation {

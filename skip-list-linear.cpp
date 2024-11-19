@@ -1,9 +1,5 @@
 #include "skip-list.h"
 
-static bool coinflip(){
-    return (rand() & 10) >= 5; // 50 50 chance
-}
-
 LinearSkipList::LinearSkipList(int total_elements, int min_val){
     head = new Node(nullptr, nullptr, min_val - 1); // header will never be removed
     max_levels = std::max(1, static_cast<int>(std::log2(total_elements))); // logN levels
