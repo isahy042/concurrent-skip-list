@@ -8,8 +8,10 @@
 #include <iomanip>
 #include <chrono>
 #include <string>
+#include <mutex>
 #include <unistd.h>
 #include <cmath>
+#include <pthread.h>
 #include <cassert>
 
 static bool coinflip(){
@@ -37,8 +39,8 @@ class SkipList
     SkipList(){}
     virtual ~SkipList(){}
 
-    Node* head; // start of skip list
-    int max_levels;
+    // Node* head; // start of skip list
+    // int max_levels;
 
     /* whether the skip list contains a node with the target value*/
     virtual bool contains(int val) = 0;
@@ -57,6 +59,21 @@ class LinearSkipList : public SkipList
 
     LinearSkipList(int total_elements, int min_val);
     ~LinearSkipList();
+
+    bool contains(int val);
+    void insert(int val);
+    void remove(int val);
+};
+
+/* Linear Skip List */
+class CoarseSkipList : public SkipList
+{
+  public:
+    LinearSkipList* skiplist;
+    pthread_mutex_t* mtx;
+
+    CoarseSkipList(int total_elements, int min_val);
+    ~CoarseSkipList();
 
     bool contains(int val);
     void insert(int val);

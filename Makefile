@@ -1,6 +1,6 @@
 APP_NAME=skip-list
 
-OBJS=main.o checker.o skip-list-linear.o
+OBJS=main.o checker.o skip-list-linear.o skip-list-coarse.o
 CXX = g++
 CXXFLAGS = -Wall -O3 -std=c++17 -m64 -I. -fopenmp -Wno-unknown-pragmas
 
