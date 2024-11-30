@@ -1,18 +1,20 @@
-#include <omp.h>
 #include <cstdint>
-#include <vector>
 #include <cstdio>
+#include <cmath>
+#include <cassert>
+
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <chrono>
+#include <vector>
 #include <string>
-#include <mutex>
+
 #include <unistd.h>
-#include <cmath>
 #include <pthread.h>
-#include <cassert>
+
+#include <omp.h>
 
 static bool coinflip(){
     return (rand() & 10) >= 5; // 50 50 chance
