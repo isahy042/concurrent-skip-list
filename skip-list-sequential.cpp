@@ -1,6 +1,8 @@
-#include "skip-list.h"
 
-LinearSkipList::LinearSkipList(int total_elements, int min_val){
+#include "skip-list-sequential.h"
+#include <cassert>
+
+SequentialSkipList::SequentialSkipList(int total_elements, int min_val){
     head = new Node(nullptr, nullptr, min_val - 1); // header will never be removed
     max_levels = std::max(1, static_cast<int>(std::log2(total_elements))); // logN levels
 
@@ -12,9 +14,8 @@ LinearSkipList::LinearSkipList(int total_elements, int min_val){
         curr_node = n;
     }
 }
-LinearSkipList:: ~LinearSkipList(){}
 
-bool LinearSkipList::contains(int val){
+bool SequentialSkipList::contains(int val){
     Node* curr_node = head;
 
     while (curr_node) {
@@ -33,7 +34,7 @@ bool LinearSkipList::contains(int val){
     return false; 
 }
 
-void LinearSkipList::insert(int val){
+void SequentialSkipList::insert(int val){
     Node* update[max_levels]; // used to mark where we would insert node at new level
 
     Node* curr_node = head;
@@ -75,8 +76,8 @@ void LinearSkipList::insert(int val){
     }
 
 }
-void LinearSkipList::remove(int val){
-    Node* update[max_levels] = {nullptr}; // used to mark where we would insert node at new level
+void SequentialSkipList::remove(int val){
+    Node* update[max_levels]; // used to mark where we would insert node at new level
 
     Node* curr_node = head;
     int curr_level = max_levels - 1; // starting at the top level
@@ -107,6 +108,3 @@ void LinearSkipList::remove(int val){
         update[i]->next = update[i]->next->next;
     }
 }
-
-
-

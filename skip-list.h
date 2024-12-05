@@ -1,20 +1,9 @@
-#include <cstdint>
-#include <cstdio>
+#pragma once
+
 #include <cmath>
-#include <cassert>
-
-#include <algorithm>
-#include <iomanip>
 #include <iostream>
-#include <fstream>
-#include <chrono>
 #include <vector>
-#include <string>
 
-#include <unistd.h>
-#include <pthread.h>
-
-#include <omp.h>
 
 static bool coinflip(){
     return (rand() & 10) >= 5; // 50 50 chance
@@ -52,36 +41,6 @@ class SkipList
     virtual void remove(int val) = 0;
 };
 
-/* Linear Skip List */
-class LinearSkipList : public SkipList
-{
-  public:
-    Node* head;
-    int max_levels;
-
-    LinearSkipList(int total_elements, int min_val);
-    ~LinearSkipList();
-
-    bool contains(int val);
-    void insert(int val);
-    void remove(int val);
-};
-
-/* Linear Skip List */
-class CoarseSkipList : public SkipList
-{
-  public:
-    LinearSkipList* skiplist;
-    pthread_mutex_t* mtx;
-
-    CoarseSkipList(int total_elements, int min_val);
-    ~CoarseSkipList();
-
-    bool contains(int val);
-    void insert(int val);
-    void remove(int val);
-};
-
 class Checker{
   public:
 
@@ -94,7 +53,6 @@ class Checker{
   void PrintOutcome();
   std::string SkipListToString();
 };
-
 
 const char *get_option_string(const char *option_name,
                               const char *default_value);

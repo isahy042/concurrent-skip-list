@@ -1,29 +1,21 @@
-#include "skip-list.h"
+#include "skip-list-coarse.h"
 
 CoarseSkipList::CoarseSkipList(int total_elements, int min_val){
-    skiplist = new LinearSkipList(total_elements, min_val);
-    pthread_mutex_init(mtx, nullptr);
+    skiplist = new SequentialSkipList(total_elements, min_val);
 }
-
-CoarseSkipList::~CoarseSkipList(){
-}
-
 
 bool CoarseSkipList::contains(int val){
+    std::lock_guard<std::mutex> guard(mtx);
     bool contains = false;
-    pthread_mutex_lock(mtx); // Lock the mutex
     contains = skiplist->contains(val);
-    pthread_mutex_unlock(mtx); // Unlock the mutex
     return contains;
 }
 
 void CoarseSkipList::insert(int val){
-    pthread_mutex_lock(mtx); 
+    std::lock_guard<std::mutex> guard(mtx);
     skiplist->insert(val);
-    pthread_mutex_unlock(mtx); 
 }
 void CoarseSkipList::remove(int val){
-    pthread_mutex_lock(mtx); 
+    std::lock_guard<std::mutex> guard(mtx);
     skiplist->remove(val);
-    pthread_mutex_unlock(mtx); 
 }
