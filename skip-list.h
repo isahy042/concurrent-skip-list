@@ -5,7 +5,7 @@
 #include <vector>
 
 
-static bool coinflip(){
+inline bool coinflip(){
     return (rand() & 10) >= 5; // 50 50 chance
 }
 
@@ -19,7 +19,7 @@ struct Operation {
 struct Node {
   Node* next;
   Node* down;
-  int value = 0;
+  int value;
   Node(Node* n, Node* d, int v) : next(n), down(d), value(v) {}
 };
 

@@ -2,7 +2,6 @@
 
 #include "skip-list.h"
 
-/* Linear Skip List */
 class SequentialSkipList : public SkipList
 {
   public:
