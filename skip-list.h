@@ -28,7 +28,6 @@ class SkipList
 {
   public:
     SkipList(){}
-    virtual ~SkipList(){}
 
     // Node* head; // start of skip list
     // int max_levels;

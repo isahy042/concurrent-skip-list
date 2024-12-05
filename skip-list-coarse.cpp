@@ -1,7 +1,8 @@
 #include "skip-list-coarse.h"
+#include "skip-list-sequential.h"
 
 CoarseSkipList::CoarseSkipList(int total_elements, int min_val){
-    skiplist = new SequentialSkipList(total_elements, min_val);
+    skiplist = std::make_unique<SequentialSkipList>(total_elements, min_val);
 }
 
 bool CoarseSkipList::contains(int val){
