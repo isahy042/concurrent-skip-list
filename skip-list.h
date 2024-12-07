@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <memory>
 
 
 inline bool coinflip(){
@@ -17,10 +18,10 @@ struct Operation {
 
 /* a single skip list node */ 
 struct Node {
-  Node* next;
-  Node* down;
+  std::shared_ptr<Node> next;
+  std::shared_ptr<Node> down;
   int value;
-  Node(Node* n, Node* d, int v) : next(n), down(d), value(v) {}
+  Node(std::shared_ptr<Node> n, std::shared_ptr<Node> d, int v) : next(n), down(d), value(v) {}
 };
 
 /* Skip List Interface */
