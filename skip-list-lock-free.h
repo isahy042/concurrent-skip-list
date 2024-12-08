@@ -2,7 +2,12 @@
 
 #include "skip-list.h"
 
-
+enum class NodeStatus {
+    VALID, 
+    DUPLICATE_KEY, 
+    NO_SUCH_KEY, 
+    NO_SUCH_NODE
+};
 
 struct LockFreeNode {
 
@@ -13,6 +18,8 @@ struct LockFreeNode {
     }; // see page 16 pf related publication
     Succ succ;
 
+    NodeStatus type = NodeStatus::VALID; 
+
     std::shared_ptr<LockFreeNode> back_link; // if a node is not (about to be) marked deleted, this is null
     
     std::shared_ptr<LockFreeNode> down;
@@ -20,7 +27,7 @@ struct LockFreeNode {
 
     int key;
 
-    LockFreeNode(int key);
+    LockFreeNode(int key): key(key) {};
     ~LockFreeNode() = default;
 };
 

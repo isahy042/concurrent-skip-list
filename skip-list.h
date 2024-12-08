@@ -1,9 +1,12 @@
 #pragma once
 
 #include <cmath>
+#include <climits>
+
 #include <iostream>
 #include <vector>
 #include <memory>
+
 
 
 inline bool coinflip(){
