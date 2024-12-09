@@ -21,9 +21,16 @@ struct LockFreeNode {
       bool mark;
       bool flag;
 
+
+        // Succ() = default;
+        // Succ(const Succ&) = default;
+        // Succ(Succ&&) = default;
+        // Succ& operator=(const Succ&) = default;
+        // Succ& operator=(Succ&&) = default;
+
       bool operator==(const Succ& other) {
         return right == other.right && mark == other.mark && flag == other.flag;
-    }
+      }
     }; // see page 16 pf related publication
     Succ succ;
 

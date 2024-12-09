@@ -67,16 +67,17 @@ std::string Checker::SkipListToString(){
     std::shared_ptr<LockFreeNode> start_node = dynamic_cast<LockFreeSkipList*>(skiplist)->head;
     int level = dynamic_cast<LockFreeSkipList*>(skiplist)->max_levels;
     s += "TOTAL LEVELS: " + std::to_string(level) + "\n";
-    while(start_node){
-        s += "LEVEL " +  std::to_string(level) + ": ";
+    int l = 1;
+    while(start_node && l <= level){
+        s += "LEVEL " +  std::to_string(l) + ": ";
         curr_node = start_node;
         while(curr_node){
             s += std::to_string(curr_node->key) + " ";
             curr_node = curr_node->succ.right;
         }
         s += "\n";
-        start_node = start_node->down;
-        level --;
+        start_node = start_node->up;
+        l++;
     }
     
     return s;

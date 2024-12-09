@@ -3,10 +3,10 @@
 #include <cassert>
 
 //TODO: Make atomic
-LockFreeNode::Succ CAS(std::shared_ptr<LockFreeNode::Succ> a, LockFreeNode::Succ old_val, LockFreeNode::Succ new_val){
-    if (*a == old_val){ // TODO: Check comparison
+LockFreeNode::Succ CAS(LockFreeNode::Succ* a, const LockFreeNode::Succ old_val, const LockFreeNode::Succ new_val){
+    if (*a == old_val){ 
         *a = new_val;
-        return old_val;
+        return LockFreeNode::Succ{old_val.right,old_val.mark,old_val.flag};
     }
     return *a;
 }
@@ -61,12 +61,12 @@ void LockFreeSkipList::insert(int val){
     std::shared_ptr<LockFreeNode> next_node = pair.second;
     
     if (prev_node->key == val) return; // duplicate key
-    
+
     std::shared_ptr<LockFreeNode> new_root = std::make_shared<LockFreeNode>(val);
     new_root->tower_root = new_root;
 
     std::shared_ptr<LockFreeNode> new_node = new_root; // node currently being inserted
-    
+
     // determine target height
     int tower_height = 1;
     while (coinflip() && tower_height <= max_levels - 1){  
@@ -74,8 +74,8 @@ void LockFreeSkipList::insert(int val){
     }
 
     int curr_level = 1;
-    while(true){ // insert node at curr_level
 
+    while(true){ // insert node at curr_level
         pair = insert_node(new_node, prev_node, next_node);
         prev_node = pair.first;
 
@@ -101,6 +101,7 @@ void LockFreeSkipList::insert(int val){
         pair = search_to_level(val, curr_level);
         prev_node = pair.first;
         next_node = pair.second;
+
     }
 
 
@@ -176,16 +177,20 @@ LockFreeNodePair LockFreeSkipList::search_right(float val, std::shared_ptr<LockF
 
 // insertion & deletion helper
 LockFreeNodePair LockFreeSkipList::insert_node(std::shared_ptr<LockFreeNode> new_node, std::shared_ptr<LockFreeNode> prev_node, std::shared_ptr<LockFreeNode> next_node){
+   
     if (prev_node->key == new_node->key) return {prev_node, std::make_shared<LockFreeNode>(RNode::DUPLICATE_KEY)};
 
     while(true){
-        
         LockFreeNode::Succ prev_succ = prev_node->succ;
-        if (prev_succ.flag == 1) // if prev_node flagged
+        if (prev_succ.flag == 1) {// if prev_node flagged
             help_flagged(prev_node, prev_succ.right); 
+        }
+
         else {
+
             new_node->succ = LockFreeNode::Succ{next_node, 0, 0};
-            LockFreeNode::Succ result = CAS(std::shared_ptr<LockFreeNode::Succ>(&prev_node->succ), LockFreeNode::Succ{next_node,0,0}, LockFreeNode::Succ{new_node,0,0});
+            LockFreeNode::Succ result = CAS(&prev_node->succ,{next_node,0,0}, {new_node,0,0});
+
             if (result == LockFreeNode::Succ{new_node,0,0}){ // CAS success
                 return {prev_node, new_node};
             }
@@ -221,7 +226,7 @@ FlagTuple LockFreeSkipList::try_flag_node(std::shared_ptr<LockFreeNode> prev_nod
         if (prev_node->succ == LockFreeNode::Succ{target_node, 0, 1}) // TODO: check comparison
             return {prev_node, NodeStatus::IN, false};
 
-        result = CAS(std::shared_ptr<LockFreeNode::Succ>(&prev_node->succ), {target_node, 0, 0}, {target_node, 0, 1});
+        result = CAS(&prev_node->succ, {target_node, 0, 0}, {target_node, 0, 1});
 
         if (result == LockFreeNode::Succ{target_node, 0, 0})  // sucess CAS
             return {prev_node, NodeStatus::IN, true};
@@ -244,7 +249,7 @@ FlagTuple LockFreeSkipList::try_flag_node(std::shared_ptr<LockFreeNode> prev_nod
     
 void LockFreeSkipList::help_marked(std::shared_ptr<LockFreeNode> prev_node, std::shared_ptr<LockFreeNode> del_node){
     std::shared_ptr<LockFreeNode> next_node = del_node->succ.right;
-    CAS(std::shared_ptr<LockFreeNode::Succ>(&prev_node->succ), {del_node,0,1}, {next_node,0,0});
+    CAS(&prev_node->succ, {del_node,0,1}, {next_node,0,0});
 }
 
 void LockFreeSkipList::help_flagged(std::shared_ptr<LockFreeNode> prev_node, std::shared_ptr<LockFreeNode> del_node){
@@ -258,7 +263,7 @@ void LockFreeSkipList::try_mark(std::shared_ptr<LockFreeNode> del_node){
     std::shared_ptr<LockFreeNode> next_node;
     while(del_node->succ.mark != 1){
         next_node = del_node->succ.right;
-        LockFreeNode::Succ result = CAS(std::shared_ptr<LockFreeNode::Succ>(&del_node->succ), {next_node,0,0}, {next_node,1,0});
+        LockFreeNode::Succ result = CAS(&del_node->succ, {next_node,0,0}, {next_node,1,0});
         if (result.mark == 0 && result.flag == 1)
             help_flagged(del_node, result.right);
     }
