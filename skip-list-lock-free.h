@@ -5,7 +5,6 @@
 enum class RNode {
     VALID, 
     DUPLICATE_KEY, 
-    NO_SUCH_KEY, 
     NO_SUCH_NODE
 };
 
@@ -13,6 +12,7 @@ enum class NodeStatus {
     IN, DELETED
 };
 
+const float EPISLON = 0.01f;
 
 struct LockFreeNode {
 
@@ -38,7 +38,9 @@ struct LockFreeNode {
 
     int key;
 
-    LockFreeNode(int key): key(key) {};
+    LockFreeNode(int k): key(k) {};
+    LockFreeNode(RNode r): type(r) {};
+
     ~LockFreeNode() = default;
 };
 
@@ -67,9 +69,9 @@ class LockFreeSkipList : public SkipList
     void remove(int val);
 
     // search helper
-    LockFreeNodePair search_to_level(int val, int level);
+    LockFreeNodePair search_to_level(float val, int level);
     std::pair<std::shared_ptr<LockFreeNode>, int> find_start(int level);
-    LockFreeNodePair search_right(int val, std::shared_ptr<LockFreeNode> curr_node);
+    LockFreeNodePair search_right(float val, std::shared_ptr<LockFreeNode> curr_node);
 
     // insertion & deletion helper
     LockFreeNodePair insert_node(std::shared_ptr<LockFreeNode> new_node, std::shared_ptr<LockFreeNode> prev_node, std::shared_ptr<LockFreeNode> next_node);
