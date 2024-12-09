@@ -2,14 +2,14 @@
 #include "skip-list-sequential.h"
 #include <cassert>
 
-SequentialSkipList::SequentialSkipList(int total_elements, int min_val){
-    head = std::make_shared<Node>(nullptr, nullptr, min_val - 1); // header will never be removed
+SequentialSkipList::SequentialSkipList(int total_elements){
+    head = std::make_shared<Node>(nullptr, nullptr, INT_MIN); // header will never be removed
     max_levels = std::max(1, static_cast<int>(std::log2(total_elements))); // logN levels
 
     // create tower of head nodes
     std::shared_ptr<Node> curr_node = head;
     for (int i = 0; i < max_levels - 1; i++){
-        std::shared_ptr<Node> n = std::make_shared<Node>(nullptr, nullptr, min_val - 1);
+        std::shared_ptr<Node> n = std::make_shared<Node>(nullptr, nullptr, INT_MIN);
         curr_node->down = n;
         curr_node = n;
     }

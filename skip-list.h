@@ -33,9 +33,6 @@ class SkipList
   public:
     SkipList(){}
 
-    // Node* head; // start of skip list
-    // int max_levels;
-
     /* whether the skip list contains a node with the target value*/
     virtual bool contains(int val) = 0;
     /* Add a node with the target value into the skip list, duplicates not allowed */

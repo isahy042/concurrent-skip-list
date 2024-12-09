@@ -1,16 +1,22 @@
 #include "skip-list-sequential.h"
+#include "skip-list-lock-free.h"
+
 
 
 Checker::Checker(char mode, int num_elements, int min_val, bool v){
     verbose = v;
     switch(mode) {
         case '1':
-            skiplist = new SequentialSkipList(num_elements, min_val);
+            skiplist = new SequentialSkipList(num_elements);
             if (verbose) std::cout << "initialized skip list with max level " << dynamic_cast<SequentialSkipList*>(skiplist)->max_levels << '\n';
+            break;
+        case '4':
+            skiplist = new LockFreeSkipList(num_elements);
+            if (verbose) std::cout << "initialized skip list with max level " << dynamic_cast<LockFreeSkipList*>(skiplist)->max_levels << '\n';
             break;
         default:
             std::cout << "checker received mode unimplemented \n";
-            skiplist = new SequentialSkipList(num_elements, min_val);
+            skiplist = new SequentialSkipList(num_elements);
     }
 
     
@@ -57,15 +63,16 @@ void Checker::PrintOutcome(){
 
 std::string Checker::SkipListToString(){
     std::string s = "";
-    std::shared_ptr<Node> curr_node;
-    std::shared_ptr<Node> start_node = dynamic_cast<SequentialSkipList*>(skiplist)->head;
-    int level = dynamic_cast<SequentialSkipList*>(skiplist)->max_levels;
+    std::shared_ptr<LockFreeNode> curr_node;
+    std::shared_ptr<LockFreeNode> start_node = dynamic_cast<LockFreeSkipList*>(skiplist)->head;
+    int level = dynamic_cast<LockFreeSkipList*>(skiplist)->max_levels;
+    s += "TOTAL LEVELS: " + std::to_string(level) + "\n";
     while(start_node){
         s += "LEVEL " +  std::to_string(level) + ": ";
         curr_node = start_node;
         while(curr_node){
-            s += std::to_string(curr_node->value) + " ";
-            curr_node = curr_node->next;
+            s += std::to_string(curr_node->key) + " ";
+            curr_node = curr_node->succ.right;
         }
         s += "\n";
         start_node = start_node->down;

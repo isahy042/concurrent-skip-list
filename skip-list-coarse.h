@@ -6,7 +6,7 @@
 class CoarseSkipList : public SkipList
 {
 public:
-    CoarseSkipList(int total_elements, int min_val);
+    CoarseSkipList(int total_elements);
     ~CoarseSkipList();
 
     bool contains(int val);
