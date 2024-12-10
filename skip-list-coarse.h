@@ -1,7 +1,6 @@
 #pragma once
 #include "skip-list.h"
 #include "skip-list-sequential.h"
-#include <memory>
 #include <mutex>
 
 class CoarseSkipList : public SkipList
@@ -15,6 +14,6 @@ public:
     void remove(int val);
 
 private:
-    std::unique_ptr<SequentialSkipList> skiplist;
+    std::shared_ptr<SequentialSkipList> skiplist;
     std::mutex mtx;
 };

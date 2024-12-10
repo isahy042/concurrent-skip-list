@@ -5,7 +5,7 @@
 class SequentialSkipList : public SkipList
 {
   public:
-    Node* head;
+    std::shared_ptr<Node> head;
     int max_levels;
 
     SequentialSkipList(int total_elements, int min_val);

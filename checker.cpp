@@ -57,8 +57,8 @@ void Checker::PrintOutcome(){
 
 std::string Checker::SkipListToString(){
     std::string s = "";
-    Node* curr_node;
-    Node* start_node = dynamic_cast<SequentialSkipList*>(skiplist)->head;
+    std::shared_ptr<Node> curr_node;
+    std::shared_ptr<Node> start_node = dynamic_cast<SequentialSkipList*>(skiplist)->head;
     int level = dynamic_cast<SequentialSkipList*>(skiplist)->max_levels;
     while(start_node){
         s += "LEVEL " +  std::to_string(level) + ": ";
