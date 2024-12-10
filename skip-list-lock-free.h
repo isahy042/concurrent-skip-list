@@ -1,6 +1,7 @@
 #pragma once
 
 #include "skip-list.h"
+#include <atomic>
 
 enum class RNode {
     VALID, 
@@ -17,22 +18,17 @@ const float EPISLON = 0.01f;
 struct LockFreeNode {
 
     struct Succ{
-      std::shared_ptr<LockFreeNode> right;
+      LockFreeNode* right;
       bool mark;
       bool flag;
-
-
-        // Succ() = default;
-        // Succ(const Succ&) = default;
-        // Succ(Succ&&) = default;
-        // Succ& operator=(const Succ&) = default;
-        // Succ& operator=(Succ&&) = default;
 
       bool operator==(const Succ& other) {
         return right == other.right && mark == other.mark && flag == other.flag;
       }
+      std::shared_ptr<LockFreeNode> get_right(){  return std::shared_ptr<LockFreeNode>(right);  }
+
     }; // see page 16 pf related publication
-    Succ succ;
+    std::atomic<Succ> succ;
 
     RNode type = RNode::VALID; 
 
@@ -49,6 +45,21 @@ struct LockFreeNode {
     LockFreeNode(RNode r): type(r) {};
 
     ~LockFreeNode() = default;
+
+    // retrieve info from atomic
+    std::shared_ptr<LockFreeNode> get_right(){  return std::shared_ptr<LockFreeNode>(succ.load().right);  }
+    bool get_mark(){  return succ.load().mark;  }
+    bool get_flag(){  return succ.load().flag;  }
+    void set_succ(Succ s){  succ.store(s);  }
+    void set_succ(std::shared_ptr<LockFreeNode> ptr, bool m, bool f){  
+      Succ s = Succ{ptr.get(), m, f};
+      succ.store(s);  
+    }
+
+
+    
+    
+      
 };
 
 struct LockFreeNodePair {

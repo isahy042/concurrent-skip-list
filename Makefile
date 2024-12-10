@@ -7,7 +7,7 @@ CXXFLAGS = -Wall -O3 -std=c++17 -I. -Wno-unknown-pragmas -g
 all: $(APP_NAME)
 
 $(APP_NAME): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS) -latomic
 
 %.o: %.cpp %.h
 	$(CXX) $(CXXFLAGS) -c $<
