@@ -66,14 +66,13 @@ class LockFreeSkipList : public SkipList
 {
   public:
     std::shared_ptr<LockFreeNode> head;
-    int max_levels;
 
     LockFreeSkipList(int total_elements);
     ~LockFreeSkipList() = default;
 
     bool contains(int val);
-    void insert(int val);
-    void remove(int val);
+    bool insert(int val);
+    bool remove(int val);
 
     // search helper
     LockFreeNodePair search_to_level(float val, int level);
@@ -90,10 +89,5 @@ class LockFreeSkipList : public SkipList
     void help_marked(std::shared_ptr<LockFreeNode> prev_node, std::shared_ptr<LockFreeNode> del_node);
     void help_flagged(std::shared_ptr<LockFreeNode> prev_node, std::shared_ptr<LockFreeNode> del_node);
     void try_mark(std::shared_ptr<LockFreeNode> del_node);
-
-
-  private:
-    int total_elements;
-    int max_layers;
 
 };
