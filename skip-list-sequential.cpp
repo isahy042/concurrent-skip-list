@@ -4,7 +4,7 @@
 
 SequentialSkipList::SequentialSkipList(int total_elements){
     head = std::make_shared<Node>(nullptr, nullptr, INT_MIN); // header will never be removed
-    max_levels_ = std::max(1, static_cast<int>(std::log2(total_elements))); // logN levels
+    max_levels_ = std::max(1, static_cast<int>(std::ceil(std::log2(total_elements)))); // logN levels
 
     // create tower of head nodes
     std::shared_ptr<Node> curr_node = head;

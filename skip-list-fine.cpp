@@ -3,15 +3,15 @@
 #include <mutex>
 
 FineSkipList::FineSkipList(int total_elements) {
-    max_levels_ = std::max(1, static_cast<int>(std::log2(total_elements)));
+    max_levels_ = std::max(1, static_cast<int>(std::ceil(std::log2(total_elements))));
 
-    l_sentinel_ = std::make_shared<FineNode>(max_levels_, INT_MIN);
+    l_sentinel_ = std::make_shared<FineNode>(max_levels_ - 1, INT_MIN);
     l_sentinel_->fully_linked_ = true;
     auto r_sentinal = std::make_shared<FineNode>(max_levels_, INT_MAX);
     r_sentinal->fully_linked_ = true;
     
     for (int i = 0; i < max_levels_; i++) {
-        l_sentinel_->next_.push_back(r_sentinal);
+        l_sentinel_->next_[i] = r_sentinal;
     }
 }
 

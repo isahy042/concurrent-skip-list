@@ -13,7 +13,9 @@ struct FineNode {
     std::mutex lock_;
 
     FineNode() : top_layer_(0), key_(INT_MIN), marked_(false), fully_linked_(false) {}
-    FineNode(int top_layer, int key) : top_layer_(top_layer), key_(key), marked_(false), fully_linked_(false) {}
+    FineNode(int top_layer, int key) : top_layer_(top_layer), key_(key), marked_(false), fully_linked_(false) {
+        next_.resize(top_layer + 1);
+    }
 };
 
 class FineSkipList : public SkipList
