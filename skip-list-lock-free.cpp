@@ -2,55 +2,53 @@
 #include "skip-list-lock-free.h"
 #include <cassert>
 
-// LockFreeNode::Succ CAS(LockFreeNode::Succ* a, const LockFreeNode::Succ old_val, const LockFreeNode::Succ new_val){
-//     if (*a == old_val){ 
-//         *a = new_val;
-//         return LockFreeNode::Succ{old_val.right,old_val.mark,old_val.flag};
-//     }
-//     return *a;
-// }
-
-LockFreeNode::Succ CAS(std::atomic<LockFreeNode::Succ>* a, const LockFreeNode::Succ old_val, const LockFreeNode::Succ new_val) {
-LockFreeNode::Succ expected = old_val;
-    // Compare and swap using std::atomic's compare_exchange_strong
-    if (a->compare_exchange_strong(expected, new_val)) {
-        return expected; // Return old value before the update
+LockFreeNode::Succ CAS(std::atomic<LockFreeNode::Succ>* a, const LockFreeNode::Succ old_val, const LockFreeNode::Succ new_val){
+    if (a->load() == old_val){ 
+        a->store(new_val);
+        return old_val;
     }
-    return a->load(); // If CAS fails, return the current value of succ
+    return a->load();
 }
+
+// LockFreeNode::Succ CAS(std::atomic<LockFreeNode::Succ>* a, const LockFreeNode::Succ old_val, const LockFreeNode::Succ new_val) {
+
+//     LockFreeNode::Succ expected = old_val;
+//     // Compare and swap using std::atomic's compare_exchange_strong
+//     if (a->compare_exchange_strong(expected, new_val)) {
+//         return expected; // Return old value before the update
+//     }
+//     return a->load(); // If CAS fails, return the current value of succ
+// }
 
 
 LockFreeSkipList::LockFreeSkipList(int total_elements){
 
     // head and tail will never be removed
-    head = std::make_shared<LockFreeNode>(INT_MIN);
-    std::shared_ptr<LockFreeNode> tail = std::make_shared<LockFreeNode>(INT_MAX); 
+    head = new LockFreeNode(INT_MIN);
+    LockFreeNode* tail = new LockFreeNode(INT_MAX); 
     
     //head->succ.right = tail;
-    head->set_succ(tail, head->get_mark(), head->get_flag());
+    head->set_succ({tail, head->get_mark(), head->get_flag()});
 
     max_levels_ = std::max(1, static_cast<int>(std::ceil(std::log2(total_elements)))); // logN levels
 
     // create tower of head and tail nodes
-    std::shared_ptr<LockFreeNode> curr_head_node = head;
-    std::shared_ptr<LockFreeNode> curr_tail_node = tail;
+    LockFreeNode* curr_head_node = head;
 
     for (int i = 0; i < max_levels_ - 1; i++){
-        std::shared_ptr<LockFreeNode> h = std::make_shared<LockFreeNode>(INT_MIN);
-        std::shared_ptr<LockFreeNode> t = std::make_shared<LockFreeNode>(INT_MAX);
+        LockFreeNode* h = new LockFreeNode(INT_MIN);
+        LockFreeNode* t = new LockFreeNode(INT_MAX);
 
         //h->succ.right = t;
-        h->set_succ(t, h->get_mark(), h->get_flag());
+        h->set_succ({t, h->get_mark(), h->get_flag()});
 
         curr_head_node->up = h;
         h->down = curr_head_node; // up ptr only used by head node
-        //t->down = curr_tail_node;
 
         // tail towers contains only keys and nothing else
         // head and tail towers does not use tower root
 
         curr_head_node = h;
-        //curr_tail_node = t;
 
     }
 
@@ -67,15 +65,15 @@ bool LockFreeSkipList::contains(int val){
 bool LockFreeSkipList::insert(int val){
 
     LockFreeNodePair pair = search_to_level(val, 1);
-    std::shared_ptr<LockFreeNode> prev_node = pair.first;
-    std::shared_ptr<LockFreeNode> next_node = pair.second;
+    LockFreeNode* prev_node = pair.first;
+    LockFreeNode* next_node = pair.second;
     
     if (prev_node->key == val) return false; // duplicate key
 
-    std::shared_ptr<LockFreeNode> new_root = std::make_shared<LockFreeNode>(val);
+    LockFreeNode* new_root = new LockFreeNode(val);
     new_root->tower_root = new_root;
 
-    std::shared_ptr<LockFreeNode> new_node = new_root; // node currently being inserted
+    LockFreeNode* new_node = new_root; // node currently being inserted
 
     // determine target height
     int tower_height = 1;
@@ -91,6 +89,8 @@ bool LockFreeSkipList::insert(int val){
 
         if (pair.second->type == RNode::DUPLICATE_KEY && curr_level == 1){
             // free new_node
+            std::cout << "duplicate key, new node freed \n" << std::flush;
+            //delete new_node;
             return false;
         }
         if (new_root->get_mark() == 1){
@@ -103,8 +103,8 @@ bool LockFreeSkipList::insert(int val){
         curr_level ++;
         if (curr_level == tower_height + 1) return true; // stop building tower
         
-        std::shared_ptr<LockFreeNode> last_node = new_node;
-        new_node = std::make_shared<LockFreeNode>(val);
+        LockFreeNode* last_node = new_node;
+        new_node = new LockFreeNode(val);
         new_node->down = last_node;
         new_node->tower_root = new_root;
 
@@ -133,9 +133,9 @@ bool LockFreeSkipList::remove(int val){
 
 LockFreeNodePair LockFreeSkipList::search_to_level(float val, int level){
 
-    std::shared_ptr<LockFreeNode> curr_node;
+    LockFreeNode* curr_node;
     int curr_v;
-    std::pair<std::shared_ptr<LockFreeNode>, int> start = find_start(level); 
+    std::pair<LockFreeNode*, int> start = find_start(level); 
     curr_node = start.first;
     curr_v = start.second;
 
@@ -149,8 +149,8 @@ LockFreeNodePair LockFreeSkipList::search_to_level(float val, int level){
 }
 
 /* Finds the upper most starting head node below a given level */
-std::pair<std::shared_ptr<LockFreeNode>, int> LockFreeSkipList::find_start(int level){
-    std::shared_ptr<LockFreeNode> curr_node = head;
+std::pair<LockFreeNode*, int> LockFreeSkipList::find_start(int level){
+    LockFreeNode* curr_node = head;
     int curr_v = 1;
 
     while ((curr_node->up->get_right()->key != INT_MAX) || (curr_v < level)){
@@ -162,8 +162,8 @@ std::pair<std::shared_ptr<LockFreeNode>, int> LockFreeSkipList::find_start(int l
 }
 
 
-LockFreeNodePair LockFreeSkipList::search_right(float val, std::shared_ptr<LockFreeNode> curr_node){
-    std::shared_ptr<LockFreeNode> next_node = curr_node->get_right();
+LockFreeNodePair LockFreeSkipList::search_right(float val, LockFreeNode* curr_node){
+    LockFreeNode* next_node = curr_node->get_right();
     while(next_node->key <= val){
 
         // tower superfluous, delete next_node
@@ -187,29 +187,29 @@ LockFreeNodePair LockFreeSkipList::search_right(float val, std::shared_ptr<LockF
 }
 
 // insertion & deletion helper
-LockFreeNodePair LockFreeSkipList::insert_node(std::shared_ptr<LockFreeNode> new_node, std::shared_ptr<LockFreeNode> prev_node, std::shared_ptr<LockFreeNode> next_node){
+LockFreeNodePair LockFreeSkipList::insert_node(LockFreeNode* new_node, LockFreeNode* prev_node, LockFreeNode* next_node){
    
-    if (prev_node->key == new_node->key) return {prev_node, std::make_shared<LockFreeNode>(RNode::DUPLICATE_KEY)};
+    if (prev_node->key == new_node->key) return {prev_node, new LockFreeNode(RNode::DUPLICATE_KEY)};
 
     while(true){
         LockFreeNode::Succ prev_succ = prev_node->succ;
         if (prev_succ.flag == 1) {// if prev_node flagged
-            help_flagged(prev_node, prev_succ.get_right()); 
+            help_flagged(prev_node, prev_succ.right); 
         }
 
         else {
 
             //new_node->succ = LockFreeNode::Succ{next_node, 0, 0};
-            new_node->set_succ(next_node,0,0);
+            new_node->set_succ({next_node,0,0});
             
-            LockFreeNode::Succ result = CAS(&prev_node->succ,{next_node.get(),0,0}, {new_node.get(),0,0});
+            LockFreeNode::Succ result = CAS(&prev_node->succ,{next_node,0,0}, {new_node,0,0});
 
-            if (result == LockFreeNode::Succ{new_node.get(),0,0}){ // CAS success
+            if (result == LockFreeNode::Succ{new_node,0,0}){ // CAS success
                 return {prev_node, new_node};
             }
             else{
                 if (result.mark == 0 && result.flag == 1){
-                    help_flagged(prev_node, result.get_right());
+                    help_flagged(prev_node, result.right);
                 }
                 while(prev_node->get_mark() == 1)
                     prev_node = prev_node->back_link;
@@ -219,32 +219,32 @@ LockFreeNodePair LockFreeSkipList::insert_node(std::shared_ptr<LockFreeNode> new
         prev_node = pair.first;
         next_node = pair.second;
         if (prev_node->key == new_node->key)
-            return {prev_node, std::make_shared<LockFreeNode>(RNode::DUPLICATE_KEY)};
+            return {prev_node, new LockFreeNode(RNode::DUPLICATE_KEY)};
     }
 }
 
-std::shared_ptr<LockFreeNode> LockFreeSkipList::delete_node(std::shared_ptr<LockFreeNode> prev_node, std::shared_ptr<LockFreeNode> del_node){
+LockFreeNode* LockFreeSkipList::delete_node(LockFreeNode* prev_node, LockFreeNode* del_node){
     FlagTuple flag_tuple = try_flag_node(prev_node, del_node);
     if (flag_tuple.status == NodeStatus::IN)
         help_flagged(prev_node, del_node);
     if (!flag_tuple.result)
-        return std::make_shared<LockFreeNode>(RNode::NO_SUCH_NODE);
+        return new LockFreeNode(RNode::NO_SUCH_NODE);
     return del_node;
 }
     
 // flagging
-FlagTuple LockFreeSkipList::try_flag_node(std::shared_ptr<LockFreeNode> prev_node, std::shared_ptr<LockFreeNode> target_node){
+FlagTuple LockFreeSkipList::try_flag_node(LockFreeNode* prev_node, LockFreeNode* target_node){
     LockFreeNode::Succ result;
     while (true){ // keep looping
-        if (prev_node->succ.load() == LockFreeNode::Succ{target_node.get(), 0, 1}) // TODO: check comparison
+        if (prev_node->succ.load() == LockFreeNode::Succ{target_node, 0, 1}) // TODO: check comparison
             return {prev_node, NodeStatus::IN, false};
 
-        result = CAS(&prev_node->succ, {target_node.get(), 0, 0}, {target_node.get(), 0, 1});
+        result = CAS(&prev_node->succ, {target_node, 0, 0}, {target_node, 0, 1});
 
-        if (result == LockFreeNode::Succ{target_node.get(), 0, 0})  // sucess CAS
+        if (result == LockFreeNode::Succ{target_node, 0, 0})  // sucess CAS
             return {prev_node, NodeStatus::IN, true};
         
-        if (result == LockFreeNode::Succ{target_node.get(), 0, 1}) // failed due to flagging
+        if (result == LockFreeNode::Succ{target_node, 0, 1}) // failed due to flagging
             return {prev_node, NodeStatus::IN, false}; 
 
         while (prev_node->get_mark() == 1) // possible failture due to marking
@@ -260,24 +260,24 @@ FlagTuple LockFreeSkipList::try_flag_node(std::shared_ptr<LockFreeNode> prev_nod
 
 }
     
-void LockFreeSkipList::help_marked(std::shared_ptr<LockFreeNode> prev_node, std::shared_ptr<LockFreeNode> del_node){
-    std::shared_ptr<LockFreeNode> next_node = del_node->get_right();
-    CAS(&prev_node->succ, {del_node.get(),0,1}, {next_node.get(),0,0});
+void LockFreeSkipList::help_marked(LockFreeNode* prev_node, LockFreeNode* del_node){
+    LockFreeNode* next_node = del_node->get_right();
+    CAS(&prev_node->succ, {del_node,0,1}, {next_node,0,0});
 }
 
-void LockFreeSkipList::help_flagged(std::shared_ptr<LockFreeNode> prev_node, std::shared_ptr<LockFreeNode> del_node){
+void LockFreeSkipList::help_flagged(LockFreeNode* prev_node, LockFreeNode* del_node){
     del_node->back_link = prev_node;
     if (del_node->get_mark() == 0)
         try_mark(del_node);
     help_marked(prev_node, del_node);
 }
 
-void LockFreeSkipList::try_mark(std::shared_ptr<LockFreeNode> del_node){
-    std::shared_ptr<LockFreeNode> next_node;
+void LockFreeSkipList::try_mark(LockFreeNode* del_node){
+    LockFreeNode* next_node;
     while(del_node->get_mark() != 1){
         next_node = del_node->get_right();
-        LockFreeNode::Succ result = CAS(&del_node->succ, {next_node.get(),0,0}, {next_node.get(),1,0});
+        LockFreeNode::Succ result = CAS(&del_node->succ, {next_node,0,0}, {next_node,1,0});
         if (result.mark == 0 && result.flag == 1)
-            help_flagged(del_node, result.get_right());
+            help_flagged(del_node, result.right);
     }
 }

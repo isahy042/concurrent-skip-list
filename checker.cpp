@@ -40,12 +40,15 @@ void Checker::RunOperations(std::vector<Operation>& ops){
 
         case 'i':
         if (verbose) std::cout << "Operation: Insert " << op.value << "\n";
-        skiplist->insert(op.value);
+        b = skiplist->insert(op.value);
+        if (verbose) std::cout << "Insert Result: " << b << "\n";
+
         break;
 
         case 'r':
         if (verbose) std::cout << "Operation: Remove " << op.value << "\n";
-        skiplist->remove(op.value);
+        b = skiplist->remove(op.value);
+        if (verbose) std::cout << "Remove Result: " << b << "\n";
         break;
 
         case 'c':
@@ -74,8 +77,8 @@ void Checker::PrintOutcome(){
 
 std::string Checker::SkipListToString(){
     std::string s = "";
-    std::shared_ptr<LockFreeNode> curr_node;
-    std::shared_ptr<LockFreeNode> start_node = std::dynamic_pointer_cast<LockFreeSkipList>(skiplist)->head;
+    LockFreeNode* curr_node;
+    LockFreeNode* start_node = std::dynamic_pointer_cast<LockFreeSkipList>(skiplist)->head;
     int level = std::dynamic_pointer_cast<LockFreeSkipList>(skiplist)->get_max_levels();
     s += "TOTAL LEVELS: " + std::to_string(level) + "\n";
     int l = 1;
@@ -84,7 +87,7 @@ std::string Checker::SkipListToString(){
         curr_node = start_node;
         while(curr_node){
             s += std::to_string(curr_node->key) + " ";
-            curr_node = curr_node->succ.right;
+            curr_node = curr_node->get_right();
         }
         s += "\n";
         start_node = start_node->up;
