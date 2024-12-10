@@ -10,8 +10,8 @@ public:
     ~CoarseSkipList() = default;
 
     bool contains(int val);
-    void insert(int val);
-    void remove(int val);
+    bool insert(int val);
+    bool remove(int val);
 
 private:
     std::shared_ptr<SequentialSkipList> skiplist;

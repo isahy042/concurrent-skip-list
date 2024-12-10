@@ -34,7 +34,7 @@ bool SequentialSkipList::contains(int val){
     return false; 
 }
 
-void SequentialSkipList::insert(int val){
+bool SequentialSkipList::insert(int val){
     std::shared_ptr<Node> update[max_levels]; // used to mark where we would insert node at new level
 
     std::shared_ptr<Node> curr_node = head;
@@ -46,7 +46,7 @@ void SequentialSkipList::insert(int val){
         if (curr_node->next && curr_node->next->value <= val) {
             // keep traversing right
             if (curr_node->next->value == val) {
-                return; // we don't need to insert.
+                return false; // we don't need to insert.
             }
             curr_node = curr_node->next;
         } else{
@@ -75,17 +75,24 @@ void SequentialSkipList::insert(int val){
         curr_level ++;
     }
 
+    return true; // insert success
+
+
 }
-void SequentialSkipList::remove(int val){
+
+bool SequentialSkipList::remove(int val){
     std::shared_ptr<Node> update[max_levels]; // used to mark where we would insert node at new level
 
     std::shared_ptr<Node> curr_node = head;
     int curr_level = max_levels - 1; // starting at the top level
 
+    bool node_exist = false;
+
     // fill out the update ptr array 
     while (curr_node) {
         if (curr_node->next && curr_node->next->value <= val) { // keep traversing right
             if (curr_node->next->value == val) { // if found on current level, drop down
+                node_exist = true;
                 update[curr_level] = curr_node;
                 curr_node = curr_node->down;
                 curr_level--;
@@ -100,6 +107,8 @@ void SequentialSkipList::remove(int val){
         }
     }
 
+    if (!node_exist) return false; // no need to remove
+
     // remove nodes
     for (int i = 0; i < max_levels; i++){
         // loop until we reach a level higher than the node's tower
@@ -107,4 +116,6 @@ void SequentialSkipList::remove(int val){
         assert(update[i]->next->value == val && "Incorrect update array when removing");
         update[i]->next = update[i]->next->next;
     }
+
+    return true; // removed successfully
 }

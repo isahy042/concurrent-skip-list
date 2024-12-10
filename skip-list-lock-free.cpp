@@ -60,7 +60,7 @@ void LockFreeSkipList::insert(int val){
     std::shared_ptr<LockFreeNode> prev_node = pair.first;
     std::shared_ptr<LockFreeNode> next_node = pair.second;
     
-    if (prev_node->key == val) return; // duplicate key
+    if (prev_node->key == val) return false; // duplicate key
 
     std::shared_ptr<LockFreeNode> new_root = std::make_shared<LockFreeNode>(val);
     new_root->tower_root = new_root;
@@ -81,13 +81,13 @@ void LockFreeSkipList::insert(int val){
 
         if (pair.second->type == RNode::DUPLICATE_KEY && curr_level == 1){
             // free new_node
-            return;
+            return true;
         }
         if (new_root->succ.mark == 1){
             if (pair.second == new_node && new_node != new_root){
                 delete_node(prev_node, new_node);
             }
-            return;
+            return true;
         }
 
         curr_level ++;
@@ -104,19 +104,18 @@ void LockFreeSkipList::insert(int val){
 
     }
 
-
 }
 
 void LockFreeSkipList::remove(int val){
-    LockFreeNodePair pair = search_to_level(val - EPISLON, 1); // TODO: shold be val - epi
-
+    LockFreeNodePair pair = search_to_level(val - EPISLON, 1); 
     if (pair.second->key != val)
-        return; // No such key
+        return false; // No such key
     if (delete_node(pair.first, pair.second)->type == RNode::NO_SUCH_NODE)
-        return; // No such key
+        return false; // No such key
 
     // delete nodes at higher level of tower
     search_to_level(val, 2);
+    return true;
 }
 
 

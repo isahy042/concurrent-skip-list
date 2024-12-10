@@ -13,6 +13,6 @@ class SequentialSkipList : public SkipList
     ~SequentialSkipList() = default;
 
     bool contains(int val);
-    void insert(int val);
-    void remove(int val);
+    bool insert(int val);
+    bool remove(int val);
 };

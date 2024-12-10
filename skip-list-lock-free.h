@@ -72,8 +72,8 @@ class LockFreeSkipList : public SkipList
     ~LockFreeSkipList() = default;
 
     bool contains(int val);
-    void insert(int val);
-    void remove(int val);
+    bool insert(int val);
+    bool remove(int val);
 
     // search helper
     LockFreeNodePair search_to_level(float val, int level);
