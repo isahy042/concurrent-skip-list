@@ -1,6 +1,6 @@
 APP_NAME=skip-list
 
-OBJS=main.o checker.o skip-list-sequential.o skip-list-coarse.o
+OBJS=main.o checker.o skip-list-fine.o
 CXX = g++
 CXXFLAGS = -Wall -O3 -std=c++17 -I. -Wno-unknown-pragmas
 

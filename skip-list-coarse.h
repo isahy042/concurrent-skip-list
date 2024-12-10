@@ -8,7 +8,7 @@ class CoarseSkipList : public SkipList
 {
 public:
     CoarseSkipList(int total_elements, int min_val);
-    ~CoarseSkipList();
+    ~CoarseSkipList() = default;
 
     bool contains(int val);
     void insert(int val);
