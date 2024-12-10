@@ -3,15 +3,14 @@
 #include <mutex>
 
 FineSkipList::FineSkipList(int total_elements) {
-    int total_elements_ = total_elements;
-    int max_layers_ = std::max(1, static_cast<int>(std::log2(total_elements)));
+    max_levels_ = std::max(1, static_cast<int>(std::log2(total_elements)));
 
-    l_sentinel_ = std::make_shared<FineNode>(max_layers_, INT_MIN);
+    l_sentinel_ = std::make_shared<FineNode>(max_levels_, INT_MIN);
     l_sentinel_->fully_linked_ = true;
-    auto r_sentinal = std::make_shared<FineNode>(max_layers_, INT_MAX);
+    auto r_sentinal = std::make_shared<FineNode>(max_levels_, INT_MAX);
     r_sentinal->fully_linked_ = true;
     
-    for (int i = 0; i < max_layers_; i++) {
+    for (int i = 0; i < max_levels_; i++) {
         l_sentinel_->next_.push_back(r_sentinal);
     }
 }
@@ -20,7 +19,7 @@ int FineSkipList::find_node(int key, std::vector<std::shared_ptr<FineNode>>& pre
     int l_found = -1;
     auto pred = l_sentinel_;
 
-    for (int layer = max_layers_ - 1; layer >= 0; layer--) {
+    for (int layer = max_levels_ - 1; layer >= 0; layer--) {
         auto curr = pred->next_[layer];
         while (key > curr->key_) {
             pred = curr;
@@ -39,8 +38,8 @@ int FineSkipList::find_node(int key, std::vector<std::shared_ptr<FineNode>>& pre
 }
 
 bool FineSkipList::contains(int key) {
-    std::vector<std::shared_ptr<FineNode>> preds(max_layers_);
-    std::vector<std::shared_ptr<FineNode>> succs(max_layers_);
+    std::vector<std::shared_ptr<FineNode>> preds(max_levels_);
+    std::vector<std::shared_ptr<FineNode>> succs(max_levels_);
     
     int l_found = find_node(key, preds, succs);
 
@@ -50,8 +49,8 @@ bool FineSkipList::contains(int key) {
 bool FineSkipList::insert(int key) {
     int top_layer = random_level();
     
-    std::vector<std::shared_ptr<FineNode>> preds(max_layers_);
-    std::vector<std::shared_ptr<FineNode>> succs(max_layers_);
+    std::vector<std::shared_ptr<FineNode>> preds(max_levels_);
+    std::vector<std::shared_ptr<FineNode>> succs(max_levels_);
 
     std::vector<std::unique_lock<std::mutex>> locks;
 
@@ -65,8 +64,6 @@ bool FineSkipList::insert(int key) {
             }
             continue;
         }
-
-        int highest_locked = -1;
         
         std::shared_ptr<FineNode> pred, succ, prev_pred = nullptr;
         bool valid = true;
@@ -77,7 +74,6 @@ bool FineSkipList::insert(int key) {
 
             if (pred != prev_pred) {
                 locks.push_back(std::unique_lock<std::mutex>(pred->lock_));
-                highest_locked = layer;
                 prev_pred = pred;
             }
             valid = !pred->marked_ && !succ->marked_ && pred->next_[layer] == succ;
@@ -101,8 +97,8 @@ bool FineSkipList::remove(int key) {
     bool is_marked = false;
     int top_layer = -1;
 
-    std::vector<std::shared_ptr<FineNode>> preds(max_layers_);
-    std::vector<std::shared_ptr<FineNode>> succs(max_layers_);
+    std::vector<std::shared_ptr<FineNode>> preds(max_levels_);
+    std::vector<std::shared_ptr<FineNode>> succs(max_levels_);
 
     std::vector<std::unique_lock<std::mutex>> locks;
 
@@ -122,8 +118,6 @@ bool FineSkipList::remove(int key) {
                 is_marked = true;
             }
 
-            int highest_locked = -1;
-
             std::shared_ptr<FineNode> pred, succ, prev_pred = nullptr;
             bool valid = true;
             for (int layer = 0; layer <= top_layer; layer++) {
@@ -132,7 +126,6 @@ bool FineSkipList::remove(int key) {
 
                 if (pred != prev_pred) {
                     locks.push_back(std::unique_lock<std::mutex>(pred->lock_));
-                    highest_locked = layer;
                     prev_pred = pred;
                 }
                 valid = !pred->marked_ && pred->next_[layer] == succ;

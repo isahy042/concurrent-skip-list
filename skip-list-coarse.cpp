@@ -3,6 +3,7 @@
 
 CoarseSkipList::CoarseSkipList(int total_elements){
     skiplist = std::make_unique<SequentialSkipList>(total_elements);
+    max_levels_ = skiplist->get_max_levels();
 }
 
 bool CoarseSkipList::contains(int val){
@@ -12,11 +13,11 @@ bool CoarseSkipList::contains(int val){
     return contains;
 }
 
-void CoarseSkipList::insert(int val){
+bool CoarseSkipList::insert(int val){
     std::lock_guard<std::mutex> guard(mtx);
-    skiplist->insert(val);
+    return skiplist->insert(val);
 }
-void CoarseSkipList::remove(int val){
+bool CoarseSkipList::remove(int val){
     std::lock_guard<std::mutex> guard(mtx);
-    skiplist->remove(val);
+    return skiplist->remove(val);
 }

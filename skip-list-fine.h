@@ -2,6 +2,7 @@
 #include "skip-list.h"
 #include <memory>
 #include <random>
+#include <mutex>
 
 struct FineNode {
     std::vector<std::shared_ptr<FineNode> > next_;
@@ -26,8 +27,6 @@ public:
     bool insert(int key);
     bool remove(int key);
 private:
-    int total_elements_;
-    int max_layers_;
     std::shared_ptr<FineNode> l_sentinel_;
 
     int find_node(int key, std::vector<std::shared_ptr<FineNode>>& preds, std::vector<std::shared_ptr<FineNode>>& succs);
@@ -38,7 +37,7 @@ private:
         std::uniform_int_distribution<> dis(0, 1);
 
         int level = 0;
-        while (level <= max_layers_ - 1) {
+        while (level <= max_levels_ - 1) {
             if (dis(gen) == 0) {
                 break;
             }

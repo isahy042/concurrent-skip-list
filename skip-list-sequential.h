@@ -5,14 +5,13 @@
 //./skip-list -f inputs/test.txt -m 1
 class SequentialSkipList : public SkipList
 {
-  public:
-    std::shared_ptr<Node> head;
-    int max_levels;
-
+public:
     SequentialSkipList(int total_elements);
     ~SequentialSkipList() = default;
 
     bool contains(int val);
-    void insert(int val);
-    void remove(int val);
+    bool insert(int val);
+    bool remove(int val);
+private:
+    std::shared_ptr<Node> head;
 };
