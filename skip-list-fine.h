@@ -1,8 +1,10 @@
 #pragma once
 #include "skip-list.h"
+#include <memory>
+#include <random>
 
 struct FineNode {
-    std::vector<std::unique_ptr<FineNode> > next_;
+    std::vector<std::shared_ptr<FineNode> > next_;
     int top_layer_;
     int key_;
     bool marked_;
@@ -21,11 +23,32 @@ public:
     ~FineSkipList() = default;
 
     bool contains(int key);
-    void insert(int key);
-    void remove(int key);
+    bool insert(int key);
+    bool remove(int key);
 private:
     int total_elements_;
     int max_layers_;
-    std::unique_ptr<FineNode> l_sentinel_;
-    std::unique_ptr<FineNode> r_sentinel_;
+    std::shared_ptr<FineNode> l_sentinel_;
+
+    int find_node(int key, std::vector<std::shared_ptr<FineNode>>& preds, std::vector<std::shared_ptr<FineNode>>& succs);
+
+    int random_level() {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, 1);
+
+        int level = 0;
+        while (level <= max_layers_ - 1) {
+            if (dis(gen) == 0) {
+                break;
+            }
+            level++;
+        }
+
+        return level;
+    }
+
+    bool ok_to_delete(std::shared_ptr<FineNode> candidate, int l_found) {
+        return candidate->fully_linked_ && candidate->top_layer_ == l_found && !candidate->marked_;
+    }
 };
