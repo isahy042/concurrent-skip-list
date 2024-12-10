@@ -3,6 +3,7 @@
 
 CoarseSkipList::CoarseSkipList(int total_elements){
     skiplist = std::make_unique<SequentialSkipList>(total_elements);
+    max_levels_ = skiplist->get_max_levels();
 }
 
 bool CoarseSkipList::contains(int val){

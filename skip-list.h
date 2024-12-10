@@ -30,8 +30,8 @@ struct Node {
 /* Skip List Interface */
 class SkipList
 {
-  public:
-    SkipList(){}
+public:
+    SkipList() = default;
 
     /* whether the skip list contains a node with the target value*/
     virtual bool contains(int val) = 0;
@@ -39,17 +39,21 @@ class SkipList
     virtual bool insert(int val) = 0;
     /* Remove the node with the target value from the skip list */
     virtual bool remove(int val) = 0;
+
+    int get_max_levels() { return max_levels_; }
+protected:
+    int max_levels_;
 };
 
 class Checker{
   public:
 
-  Checker(char mode, int num_ops, int min_val, bool v);
+  Checker(char mode, int num_ops, bool v);
 
-  SkipList* skiplist;
+  std::shared_ptr<SkipList> skiplist;
   bool verbose;
 
-  void RunOperations(std::vector<Operation>* ops);
+  void RunOperations(std::vector<Operation>& ops);
   void PrintOutcome();
   std::string SkipListToString();
 };

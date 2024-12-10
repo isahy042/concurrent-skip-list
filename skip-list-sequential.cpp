@@ -4,11 +4,11 @@
 
 SequentialSkipList::SequentialSkipList(int total_elements){
     head = std::make_shared<Node>(nullptr, nullptr, INT_MIN); // header will never be removed
-    max_levels = std::max(1, static_cast<int>(std::log2(total_elements))); // logN levels
+    max_levels_ = std::max(1, static_cast<int>(std::ceil(std::log2(total_elements)))); // logN levels
 
     // create tower of head nodes
     std::shared_ptr<Node> curr_node = head;
-    for (int i = 0; i < max_levels - 1; i++){
+    for (int i = 0; i < max_levels_ - 1; i++){
         std::shared_ptr<Node> n = std::make_shared<Node>(nullptr, nullptr, INT_MIN);
         curr_node->down = n;
         curr_node = n;
@@ -35,11 +35,13 @@ bool SequentialSkipList::contains(int val){
 }
 
 bool SequentialSkipList::insert(int val){
-    std::shared_ptr<Node> update[max_levels]; // used to mark where we would insert node at new level
+    if (contains(val)) return false;
+
+    std::shared_ptr<Node> update[max_levels_]; // used to mark where we would insert node at new level
 
     std::shared_ptr<Node> curr_node = head;
     
-    int curr_level = max_levels - 1; // starting at the top level
+    int curr_level = max_levels_ - 1; // starting at the top level
 
     // fill out the update ptr array 
     while (curr_node) {
@@ -65,7 +67,7 @@ bool SequentialSkipList::insert(int val){
     curr_node = nullptr;
 
     // coinflip to determine how many levels to promote this new node for
-    while ((coinflip() && curr_level < max_levels) || curr_level == 0){  
+    while ((coinflip() && curr_level < max_levels_) || curr_level == 0){  
 
         assert(update[curr_level] && "null ptr in update array when inserting"); // should not be nullptr
 
@@ -75,24 +77,19 @@ bool SequentialSkipList::insert(int val){
         curr_level ++;
     }
 
-    return true; // insert success
-
-
+    return true;
 }
-
 bool SequentialSkipList::remove(int val){
-    std::shared_ptr<Node> update[max_levels]; // used to mark where we would insert node at new level
+    if (!contains(val)) return false;
+    std::shared_ptr<Node> update[max_levels_]; // used to mark where we would insert node at new level
 
     std::shared_ptr<Node> curr_node = head;
-    int curr_level = max_levels - 1; // starting at the top level
-
-    bool node_exist = false;
+    int curr_level = max_levels_ - 1; // starting at the top level
 
     // fill out the update ptr array 
     while (curr_node) {
         if (curr_node->next && curr_node->next->value <= val) { // keep traversing right
             if (curr_node->next->value == val) { // if found on current level, drop down
-                node_exist = true;
                 update[curr_level] = curr_node;
                 curr_node = curr_node->down;
                 curr_level--;
@@ -107,15 +104,13 @@ bool SequentialSkipList::remove(int val){
         }
     }
 
-    if (!node_exist) return false; // no need to remove
-
     // remove nodes
-    for (int i = 0; i < max_levels; i++){
+    for (int i = 0; i < max_levels_; i++){
         // loop until we reach a level higher than the node's tower
         if (!update[i]) break;
         assert(update[i]->next->value == val && "Incorrect update array when removing");
         update[i]->next = update[i]->next->next;
     }
 
-    return true; // removed successfully
+    return true;
 }

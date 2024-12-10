@@ -52,9 +52,9 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  int num_ops, num_elements, min_val;
+  int num_ops, num_elements;
   /* Read the number of operations from file */
-  fin >> num_ops >> num_elements >> min_val;
+  fin >> num_ops >> num_elements;
 
   std::vector<Operation> operations(num_ops);
 
@@ -68,9 +68,9 @@ int main(int argc, char *argv[]) {
   const auto compute_start = std::chrono::steady_clock::now();
   
   // run the operations with a checker
-  Checker* checker = new Checker(mode, num_elements, min_val, verbose);
-  checker->RunOperations(&operations);
-  checker->PrintOutcome();
+  Checker checker(mode, num_elements, verbose);
+  checker.RunOperations(operations);
+  checker.PrintOutcome();
 
   const double compute_time = std::chrono::duration_cast<std::chrono::duration<double> >(std::chrono::steady_clock::now() - compute_start).count();
   std::cout << "Computation time (sec): " << compute_time << '\n';
