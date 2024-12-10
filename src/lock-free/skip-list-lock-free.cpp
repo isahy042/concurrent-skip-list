@@ -268,3 +268,7 @@ void LockFreeSkipList::try_mark(std::shared_ptr<LockFreeNode> del_node){
             help_flagged(del_node, result.right);
     }
 }
+
+void LockFreeSkipList::validate() {
+    std::cout << "Validating Lock-Free Skip List not implemented" << std::endl;
+}

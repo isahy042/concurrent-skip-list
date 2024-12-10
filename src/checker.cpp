@@ -1,7 +1,7 @@
-#include "skip-list-sequential.h"
+#include "sequential/skip-list-sequential.h"
 // #include "skip-list-lock-free.h"
-#include "skip-list-coarse.h"
-#include "skip-list-fine.h"
+#include "coarse/skip-list-coarse.h"
+#include "fine/skip-list-fine.h"
 
 
 
@@ -59,6 +59,8 @@ void Checker::RunOperations(std::vector<Operation>& ops){
 
         }
 
+        // Validate the list
+
         // if (verbose){
         //     PrintOutcome();
         //     std::cout << "\n";
@@ -66,6 +68,7 @@ void Checker::RunOperations(std::vector<Operation>& ops){
 
         
     }
+    skiplist->validate();
 }
 
 void Checker::PrintOutcome(){

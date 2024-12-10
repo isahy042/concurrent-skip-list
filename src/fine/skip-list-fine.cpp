@@ -1,4 +1,5 @@
 #include "skip-list-fine.h"
+#include <cassert>
 #include <memory>
 #include <mutex>
 
@@ -141,4 +142,17 @@ bool FineSkipList::remove(int key) {
             return false;
         }
     }
+}
+
+void FineSkipList::validate() {
+    for (int layer = max_levels_ - 1; layer >= 0; layer--) {
+        auto curr = l_sentinel_;
+        while (curr->key_ != INT_MAX) {
+            auto next = curr->next_[layer];
+            ASSERT_MSG(curr->key_ < next->key_, "List is not sorted");
+            curr = next;
+        }
+    }
+
+    std::cout << "Validation successful\n";
 }

@@ -114,3 +114,34 @@ bool SequentialSkipList::remove(int val){
 
     return true;
 }
+
+/**
+ * Validates the skip list to ensure it maintains all invariants (each layer is sorted and each column is equivalent).
+ * Go from top to bottom to make sure for each layer, it is sorted and the element underneath is equivalent.   
+ */
+void SequentialSkipList::validate() {
+    auto curr = head;
+    
+    for (int layer = max_levels_ - 1; layer >= 0; layer--) {
+        std::shared_ptr<Node> temp_curr = curr;
+        if (layer > 0) {
+            curr = curr->down;
+        }
+
+        while(temp_curr) {
+            // First check the node below is the same
+            if (temp_curr->down) {
+                ASSERT_MSG(temp_curr->down->value == temp_curr->value, "Node below is not the same");
+            }
+
+            // Check next node is greater than current one
+            if (temp_curr->next) {
+                ASSERT_MSG(temp_curr->next->value > temp_curr->value, "Next node is not greater than current one");
+            }
+            temp_curr = temp_curr->next;
+        }
+    }
+
+    std::cout << "Validation successful" << std::endl;
+}
+

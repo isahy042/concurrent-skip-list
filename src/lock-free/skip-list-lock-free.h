@@ -1,6 +1,6 @@
 #pragma once
 
-#include "skip-list.h"
+#include "../skip-list.h"
 
 enum class RNode {
     VALID, 
@@ -73,6 +73,8 @@ class LockFreeSkipList : public SkipList
     bool contains(int val);
     bool insert(int val);
     bool remove(int val);
+
+    void validate();
 
     // search helper
     LockFreeNodePair search_to_level(float val, int level);
