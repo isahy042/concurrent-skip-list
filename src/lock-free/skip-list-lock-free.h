@@ -21,15 +21,13 @@ struct LockFreeNode {
       LockFreeNode* right = nullptr;
       unsigned int mark = 0;
       unsigned int flag = 0;
-      //bool padding[6];
-      
 
       bool operator==(const Succ& other) {
         return right == other.right && mark == other.mark && flag == other.flag;
       }
 
     }; // see page 16 pf related publication
-    std::atomic<Succ> succ;
+    std::atomic<Succ> succ{Succ()};
 
     RNode type = RNode::VALID; 
 
