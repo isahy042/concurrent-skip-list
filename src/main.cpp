@@ -6,7 +6,6 @@
 #include <iostream>
 
 int main(int argc, char *argv[]) {
-  const auto init_start = std::chrono::steady_clock::now();
 
   std::string input_filename;
   int num_threads = 1;
@@ -14,7 +13,7 @@ int main(int argc, char *argv[]) {
   bool verbose = false;
 
   int opt;
-  while ((opt = getopt(argc, argv, "f:n:p:m:v::")) != -1) {
+  while ((opt = getopt(argc, argv, "f:n:m:v::")) != -1) {
     switch (opt) {
       case 'f':
         input_filename = optarg;
@@ -29,7 +28,7 @@ int main(int argc, char *argv[]) {
         verbose = true;
         break;
       default:
-        std::cerr << "Usage: " << argv[0] << " -f input_filename -m mode [-n num_threads] [-b batch_size] [-v]\n";
+        std::cerr << "Usage: " << argv[0] << " -f input_filename -m mode [-n num_threads] [-v]\n";
         exit(EXIT_FAILURE);
     }
   }
@@ -62,9 +61,6 @@ int main(int argc, char *argv[]) {
     fin >> op.op >> op.value;
   }
 
-  const double init_time = std::chrono::duration_cast<std::chrono::duration<double> >(std::chrono::steady_clock::now() - init_start).count();
-  std::cout << "Initialization time (sec): " << std::fixed << std::setprecision(10) << init_time << '\n';
-
   const auto compute_start = std::chrono::steady_clock::now();
   
   // run the operations with a checker
@@ -75,4 +71,3 @@ int main(int argc, char *argv[]) {
   const double compute_time = std::chrono::duration_cast<std::chrono::duration<double> >(std::chrono::steady_clock::now() - compute_start).count();
   std::cout << "Computation time (sec): " << compute_time << '\n';
 }
-
