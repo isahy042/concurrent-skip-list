@@ -62,12 +62,12 @@ void Checker::RunOperations(std::vector<Operation>& ops){
 
         }
 
-        if (verbose){
-            PrintOutcome();
-            std::cout << "\n";
-        }
+        // if (verbose){
+        //     PrintOutcome();
+        //     
+        // }
 
-        
+        std::cout << "\n";
     }
 }
 

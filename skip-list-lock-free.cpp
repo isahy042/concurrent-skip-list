@@ -49,16 +49,13 @@ LockFreeSkipList::LockFreeSkipList(int total_elements){
 
 bool LockFreeSkipList::contains(int val){
     LockFreeNodePair pair = search_to_level(val, 1); 
-    if (pair.second->key == val) return true;
+    if (pair.first->key == val) return true;
     return false;
 }
 
 bool LockFreeSkipList::insert(int val){
-    std::cout<<"inserting \n"<<std::endl;
-
     LockFreeNodePair pair = search_to_level(val, 1);
     
-
     LockFreeNode* prev_node = pair.first;
     LockFreeNode* next_node = pair.second;
     
@@ -78,14 +75,12 @@ bool LockFreeSkipList::insert(int val){
     int curr_level = 1;
 
     while(true){ // insert node at curr_level
-        std::cout<<"insert looping"<<std::endl;
         pair = insert_node(new_node, prev_node, next_node);
         prev_node = pair.first;
 
         if (pair.second->type == RNode::DUPLICATE_KEY && curr_level == 1){
             // free new_node
-            std::cout << "duplicate key, new node freed \n" << std::flush;
-            //delete new_node;
+            delete new_node;
             return false;
         }
         if (new_root->get_mark() == 1){
@@ -127,13 +122,11 @@ bool LockFreeSkipList::remove(int val){
 
 
 LockFreeNodePair LockFreeSkipList::search_to_level(float val, int level){
-std::cout<<"search to loopin1g "<<std::endl;
     std::pair<LockFreeNode*, int> start = find_start(level); 
     LockFreeNode* curr_node = start.first;
     int curr_v = start.second;
 
     while (curr_v > level){
-        std::cout<<"search to looping "<<std::endl;
         LockFreeNodePair pair = search_right(val, curr_node);
         curr_node = pair.first->down;
         curr_v --;
@@ -150,8 +143,6 @@ std::pair<LockFreeNode*, int> LockFreeSkipList::find_start(int level){
     int curr_v = 1;
 
     while ((curr_node->up->get_right()->key != INT_MAX) || (curr_v < level)){
-        std::cout<<"e "<<std::endl;
-        
         curr_node = curr_node->up;
         curr_v ++;
     }
