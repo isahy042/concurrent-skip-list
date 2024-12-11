@@ -1,5 +1,5 @@
 #pragma once
-#include "skip-list.h"
+#include "../skip-list.h"
 #include <memory>
 #include <random>
 #include <mutex>
@@ -28,6 +28,8 @@ public:
     bool contains(int key);
     bool insert(int key);
     bool remove(int key);
+
+    void validate();
 private:
     std::shared_ptr<FineNode> l_sentinel_;
 
@@ -39,7 +41,7 @@ private:
         std::uniform_int_distribution<> dis(0, 1);
 
         int level = 0;
-        while (level <= max_levels_ - 1) {
+        while (level < max_levels_ - 1) {
             if (dis(gen) == 0) {
                 break;
             }

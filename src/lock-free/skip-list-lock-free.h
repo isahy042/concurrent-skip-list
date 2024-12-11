@@ -1,6 +1,6 @@
 #pragma once
 
-#include "skip-list.h"
+#include "../skip-list.h"
 #include <atomic>
 
 enum class RNode {
@@ -78,6 +78,8 @@ class LockFreeSkipList : public SkipList
     bool insert(int val);
     bool remove(int val);
 
+    void validate();
+    
     // search helper
     LockFreeNodePair search_to_level(float val, int level);
     std::pair<LockFreeNode*, int> find_start(int level);

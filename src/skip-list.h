@@ -7,6 +7,11 @@
 #include <vector>
 #include <memory>
 
+#define ASSERT_MSG(cond, msg) \
+    if (!(cond)) { \
+        std::cerr << "Assertion failed: " << msg << std::endl; \
+        assert(cond); \
+    }
 
 
 inline bool coinflip(){
@@ -32,6 +37,7 @@ class SkipList
 {
 public:
     SkipList() = default;
+    virtual ~SkipList() = default;
 
     /* whether the skip list contains a node with the target value*/
     virtual bool contains(int val) = 0;
@@ -40,6 +46,13 @@ public:
     /* Remove the node with the target value from the skip list */
     virtual bool remove(int val) = 0;
 
+    /* 
+      Validates the skip list to ensure it maintains all invariants (each layer is sorted and each column is equivalent)
+      This is not meant to be run in a multi-threaded context
+    */
+    virtual void validate() = 0;
+
+    /* Returns the max number of levels in skip list */
     int get_max_levels() { return max_levels_; }
 protected:
     int max_levels_;

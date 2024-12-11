@@ -1,5 +1,5 @@
 #include "skip-list-coarse.h"
-#include "skip-list-sequential.h"
+#include "../sequential/skip-list-sequential.h"
 
 CoarseSkipList::CoarseSkipList(int total_elements){
     skiplist = std::make_unique<SequentialSkipList>(total_elements);
@@ -20,4 +20,9 @@ bool CoarseSkipList::insert(int val){
 bool CoarseSkipList::remove(int val){
     std::lock_guard<std::mutex> guard(mtx);
     return skiplist->remove(val);
+}
+
+void CoarseSkipList::validate(){
+    std::lock_guard<std::mutex> guard(mtx);
+    skiplist->validate();
 }

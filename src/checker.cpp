@@ -1,7 +1,7 @@
-#include "skip-list-sequential.h"
-#include "skip-list-lock-free.h"
-#include "skip-list-coarse.h"
-#include "skip-list-fine.h"
+#include "sequential/skip-list-sequential.h"
+#include "lock-free/skip-list-lock-free.h"
+#include "coarse/skip-list-coarse.h"
+#include "fine/skip-list-fine.h"
 
 
 
@@ -21,7 +21,7 @@ Checker::Checker(char mode, int num_elements, bool v){
             if (verbose) std::cout << "initialized fine-grain skip list with max levels " << skiplist->get_max_levels() << '\n';
             break;
         case '4':
-           skiplist = std::make_shared<LockFreeSkipList>(num_elements);
+            skiplist = std::make_shared<LockFreeSkipList>(num_elements);
             if (verbose) std::cout << "initialized lock free skip list with max levels " << skiplist->get_max_levels() << '\n';
             break;
         
@@ -40,15 +40,12 @@ void Checker::RunOperations(std::vector<Operation>& ops){
 
         case 'i':
         if (verbose) std::cout << "Operation: Insert " << op.value << "\n";
-        b = skiplist->insert(op.value);
-        if (verbose) std::cout << "Insert Result: " << b << "\n";
-
+        skiplist->insert(op.value);
         break;
 
         case 'r':
         if (verbose) std::cout << "Operation: Remove " << op.value << "\n";
-        b = skiplist->remove(op.value);
-        if (verbose) std::cout << "Remove Result: " << b << "\n";
+        skiplist->remove(op.value);
         break;
 
         case 'c':
@@ -62,37 +59,40 @@ void Checker::RunOperations(std::vector<Operation>& ops){
 
         }
 
+        // Validate the list
+
         // if (verbose){
         //     PrintOutcome();
-        //     
+        //     std::cout << "\n";
         // }
 
-        std::cout << "\n";
+        
     }
+    skiplist->validate();
 }
 
 void Checker::PrintOutcome(){
-    std::cout << "Simulation Outcome: \n" << SkipListToString();
+    // td::cout << "Simulation Outcome: \n" << SkipListToString();
 }
 
-std::string Checker::SkipListToString(){
-    std::string s = "";
-    LockFreeNode* curr_node;
-    LockFreeNode* start_node = std::dynamic_pointer_cast<LockFreeSkipList>(skiplist)->head;
-    int level = std::dynamic_pointer_cast<LockFreeSkipList>(skiplist)->get_max_levels();
-    s += "TOTAL LEVELS: " + std::to_string(level) + "\n";
-    int l = 1;
-    while(start_node && l <= level){
-        s += "LEVEL " +  std::to_string(l) + ": ";
-        curr_node = start_node;
-        while(curr_node){
-            s += std::to_string(curr_node->key) + " ";
-            curr_node = curr_node->get_right();
-        }
-        s += "\n";
-        start_node = start_node->up;
-        l++;
-    }
+// std::string Checker::SkipListToString(){
+//     std::string s = "";
+//     std::shared_ptr<LockFreeNode> curr_node;
+//     std::shared_ptr<LockFreeNode> start_node = dynamic_cast<LockFreeSkipList*>(skiplist)->head;
+//     int level = dynamic_cast<LockFreeSkipList*>(skiplist)->max_levels;
+//     s += "TOTAL LEVELS: " + std::to_string(level) + "\n";
+//     int l = 1;
+//     while(start_node && l <= level){
+//         s += "LEVEL " +  std::to_string(l) + ": ";
+//         curr_node = start_node;
+//         while(curr_node){
+//             s += std::to_string(curr_node->key) + " ";
+//             curr_node = curr_node->succ.right;
+//         }
+//         s += "\n";
+//         start_node = start_node->up;
+//         l++;
+//     }
     
-    return s;
-}
+//     return s;
+// }

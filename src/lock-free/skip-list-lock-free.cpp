@@ -120,6 +120,36 @@ bool LockFreeSkipList::remove(int val){
     return true;
 }
 
+/**
+ * Validates the skip list to ensure it maintains all invariants (each layer is sorted and each column is equivalent).
+ * Go from top to bottom to make sure for each layer, it is sorted and the element underneath is equivalent.   
+ */
+void LockFreeSkipList::validate() {
+    auto curr = head; // head points to the root of the tower
+    
+    for (int layer = 0; layer < max_levels_ ; layer++) {
+        LockFreeNode* temp_curr = curr;
+
+        if (layer > 0) {
+            curr = curr->up;
+        }
+
+        while(temp_curr) {
+            // First check the node below is the same
+            if (temp_curr->down) {
+                ASSERT_MSG(temp_curr->down->key == temp_curr->key, "Node below is not the same");
+            }
+
+            // Check next node is greater than current one
+            if (temp_curr->get_right()) {
+                ASSERT_MSG(temp_curr->get_right()->key > temp_curr->key, "Next node is not greater than current one");
+            }
+            temp_curr = temp_curr->get_right();
+        }
+    }
+
+    std::cout << "Validation successful" << std::endl;
+}
 
 LockFreeNodePair LockFreeSkipList::search_to_level(float val, int level){
     std::pair<LockFreeNode*, int> start = find_start(level); 

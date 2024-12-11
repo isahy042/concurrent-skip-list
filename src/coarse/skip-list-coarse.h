@@ -1,6 +1,6 @@
 #pragma once
-#include "skip-list.h"
-#include "skip-list-sequential.h"
+#include "../skip-list.h"
+#include "../sequential/skip-list-sequential.h"
 #include <mutex>
 
 class CoarseSkipList : public SkipList
@@ -12,6 +12,8 @@ public:
     bool contains(int val);
     bool insert(int val);
     bool remove(int val);
+
+    void validate();
 
 private:
     std::shared_ptr<SequentialSkipList> skiplist;
