@@ -18,9 +18,9 @@ const float EPISLON = 0.01f;
 struct LockFreeNode {
 
     struct  Succ{
-      LockFreeNode* right = nullptr;
-      unsigned int mark = 0;
-      unsigned int flag = 0;
+      LockFreeNode* right;
+      unsigned int mark;
+      unsigned int flag;
 
       bool operator==(const Succ& other) {
         return right == other.right && mark == other.mark && flag == other.flag;
