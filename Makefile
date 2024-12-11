@@ -14,7 +14,7 @@ MAIN_EXEC = $(BUILD_DIR)/$(APP_NAME)
 TEST_EXEC = $(BUILD_DIR)/test_suite
 
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -O3 -I$(SRC_DIR) -g -fsanitize=address
+CXXFLAGS = -std=c++17 -Wall -O3 -I$(SRC_DIR) -g
 
 # Default target
 all: $(MAIN_EXEC)
