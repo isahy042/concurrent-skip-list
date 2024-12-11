@@ -4,12 +4,11 @@
 
 LockFreeNode::Succ CAS(std::atomic<LockFreeNode::Succ>* a, const LockFreeNode::Succ old_val, const LockFreeNode::Succ new_val) {
 
-    LockFreeNode::Succ expected = a->load();
-    // Compare and swap using std::atomic's compare_exchange_strong
+    LockFreeNode::Succ expected = old_val;
     if (a->compare_exchange_strong(expected, new_val)) {
-        return expected; // Return old value before the update
+        return expected; 
     }
-    return a->load(); // If CAS fails, return the current value of succ
+    return a->load();
 }
 
 
@@ -27,7 +26,7 @@ LockFreeSkipList::LockFreeSkipList(int total_elements){
     // create tower of head and tail nodes
     LockFreeNode* curr_head_node = head;
 
-    for (int i = 0; i < max_levels_ - 1; i++){
+    for (int i = 0; i < max_levels_; i++){
         LockFreeNode* h = new LockFreeNode(INT_MIN);
         LockFreeNode* t = new LockFreeNode(INT_MAX);
 
@@ -55,8 +54,11 @@ bool LockFreeSkipList::contains(int val){
 }
 
 bool LockFreeSkipList::insert(int val){
+    std::cout<<"inserting \n"<<std::endl;
 
     LockFreeNodePair pair = search_to_level(val, 1);
+    
+
     LockFreeNode* prev_node = pair.first;
     LockFreeNode* next_node = pair.second;
     
@@ -76,6 +78,7 @@ bool LockFreeSkipList::insert(int val){
     int curr_level = 1;
 
     while(true){ // insert node at curr_level
+        std::cout<<"insert looping"<<std::endl;
         pair = insert_node(new_node, prev_node, next_node);
         prev_node = pair.first;
 
@@ -124,28 +127,31 @@ bool LockFreeSkipList::remove(int val){
 
 
 LockFreeNodePair LockFreeSkipList::search_to_level(float val, int level){
-
-    LockFreeNode* curr_node;
-    int curr_v;
+std::cout<<"search to loopin1g "<<std::endl;
     std::pair<LockFreeNode*, int> start = find_start(level); 
-    curr_node = start.first;
-    curr_v = start.second;
+    LockFreeNode* curr_node = start.first;
+    int curr_v = start.second;
 
-    while (start.second > val){
+    while (curr_v > level){
+        std::cout<<"search to looping "<<std::endl;
         LockFreeNodePair pair = search_right(val, curr_node);
         curr_node = pair.first->down;
         curr_v --;
+        
+        
     }
 
     return search_right(val, curr_node);
 }
 
-/* Finds the upper most starting head node below a given level */
+/* Finds the lowest head node that points to the tail tower */
 std::pair<LockFreeNode*, int> LockFreeSkipList::find_start(int level){
     LockFreeNode* curr_node = head;
     int curr_v = 1;
 
     while ((curr_node->up->get_right()->key != INT_MAX) || (curr_v < level)){
+        std::cout<<"e "<<std::endl;
+        
         curr_node = curr_node->up;
         curr_v ++;
     }
@@ -181,10 +187,14 @@ LockFreeNodePair LockFreeSkipList::search_right(float val, LockFreeNode* curr_no
 // insertion & deletion helper
 LockFreeNodePair LockFreeSkipList::insert_node(LockFreeNode* new_node, LockFreeNode* prev_node, LockFreeNode* next_node){
    
-    if (prev_node->key == new_node->key) return {prev_node, new LockFreeNode(RNode::DUPLICATE_KEY)};
+    if (prev_node->key == new_node->key){
+        std::cout << "prev_node->key == new_node->key. Duplication detected Initially. \n" << std::flush;
+        return {prev_node, new LockFreeNode(RNode::DUPLICATE_KEY)};
+    }
 
     while(true){
-        LockFreeNode::Succ prev_succ = prev_node->succ;
+
+        LockFreeNode::Succ prev_succ = prev_node->succ.load();
         if (prev_succ.flag == 1) {// if prev_node flagged
             help_flagged(prev_node, prev_succ.right); 
         }
@@ -195,7 +205,8 @@ LockFreeNodePair LockFreeSkipList::insert_node(LockFreeNode* new_node, LockFreeN
             new_node->set_succ({next_node,0,0});
             LockFreeNode::Succ result = CAS(&prev_node->succ,{next_node,0,0}, {new_node,0,0});
 
-            if (result == LockFreeNode::Succ{new_node,0,0}){ // CAS success
+            // NOTE: mistake in paper pseudocode InsertNode line 10
+            if (prev_node->succ.load() == LockFreeNode::Succ{new_node,0,0}){ // CAS success
                 return {prev_node, new_node};
             }
             else{
@@ -209,8 +220,10 @@ LockFreeNodePair LockFreeSkipList::insert_node(LockFreeNode* new_node, LockFreeN
         LockFreeNodePair pair = search_right(new_node->key, prev_node);
         prev_node = pair.first;
         next_node = pair.second;
-        if (prev_node->key == new_node->key)
+        if (prev_node->key == new_node->key){
+            std::cout << prev_node->key << " prev_node->key == new_node->key. Duplication detected. \n" << std::flush;
             return {prev_node, new LockFreeNode(RNode::DUPLICATE_KEY)};
+        }
     }
 }
 
