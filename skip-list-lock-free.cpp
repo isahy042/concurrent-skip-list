@@ -2,23 +2,15 @@
 #include "skip-list-lock-free.h"
 #include <cassert>
 
-LockFreeNode::Succ CAS(std::atomic<LockFreeNode::Succ>* a, const LockFreeNode::Succ old_val, const LockFreeNode::Succ new_val){
-    if (a->load() == old_val){ 
-        a->store(new_val);
-        return old_val;
+LockFreeNode::Succ CAS(std::atomic<LockFreeNode::Succ>* a, const LockFreeNode::Succ old_val, const LockFreeNode::Succ new_val) {
+
+    LockFreeNode::Succ expected = a->load();
+    // Compare and swap using std::atomic's compare_exchange_strong
+    if (a->compare_exchange_strong(expected, new_val)) {
+        return expected; // Return old value before the update
     }
-    return a->load();
+    return a->load(); // If CAS fails, return the current value of succ
 }
-
-// LockFreeNode::Succ CAS(std::atomic<LockFreeNode::Succ>* a, const LockFreeNode::Succ old_val, const LockFreeNode::Succ new_val) {
-
-//     LockFreeNode::Succ expected = old_val;
-//     // Compare and swap using std::atomic's compare_exchange_strong
-//     if (a->compare_exchange_strong(expected, new_val)) {
-//         return expected; // Return old value before the update
-//     }
-//     return a->load(); // If CAS fails, return the current value of succ
-// }
 
 
 LockFreeSkipList::LockFreeSkipList(int total_elements){
@@ -201,7 +193,6 @@ LockFreeNodePair LockFreeSkipList::insert_node(LockFreeNode* new_node, LockFreeN
 
             //new_node->succ = LockFreeNode::Succ{next_node, 0, 0};
             new_node->set_succ({next_node,0,0});
-            
             LockFreeNode::Succ result = CAS(&prev_node->succ,{next_node,0,0}, {new_node,0,0});
 
             if (result == LockFreeNode::Succ{new_node,0,0}){ // CAS success

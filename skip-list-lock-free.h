@@ -17,10 +17,12 @@ const float EPISLON = 0.01f;
 
 struct LockFreeNode {
 
-    struct Succ{
+    struct  Succ{
       LockFreeNode* right;
-      bool mark;
-      bool flag;
+      unsigned int mark = 0;
+      unsigned int flag = 0;
+      //bool padding[6];
+      
 
       bool operator==(const Succ& other) {
         return right == other.right && mark == other.mark && flag == other.flag;

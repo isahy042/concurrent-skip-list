@@ -77,22 +77,22 @@ void Checker::PrintOutcome(){
 
 std::string Checker::SkipListToString(){
     std::string s = "";
-    LockFreeNode* curr_node;
-    LockFreeNode* start_node = std::dynamic_pointer_cast<LockFreeSkipList>(skiplist)->head;
-    int level = std::dynamic_pointer_cast<LockFreeSkipList>(skiplist)->get_max_levels();
-    s += "TOTAL LEVELS: " + std::to_string(level) + "\n";
-    int l = 1;
-    while(start_node && l <= level){
-        s += "LEVEL " +  std::to_string(l) + ": ";
-        curr_node = start_node;
-        while(curr_node){
-            s += std::to_string(curr_node->key) + " ";
-            curr_node = curr_node->get_right();
-        }
-        s += "\n";
-        start_node = start_node->up;
-        l++;
-    }
+    // LockFreeNode* curr_node;
+    // LockFreeNode* start_node = std::dynamic_pointer_cast<LockFreeSkipList>(skiplist)->head;
+    // int level = std::dynamic_pointer_cast<LockFreeSkipList>(skiplist)->get_max_levels();
+    // s += "TOTAL LEVELS: " + std::to_string(level) + "\n";
+    // int l = 1;
+    // while(start_node && l <= level){
+    //     s += "LEVEL " +  std::to_string(l) + ": ";
+    //     curr_node = start_node;
+    //     while(curr_node){
+    //         s += std::to_string(curr_node->key) + " ";
+    //         curr_node = curr_node->get_right();
+    //     }
+    //     s += "\n";
+    //     start_node = start_node->up;
+    //     l++;
+    // }
     
     return s;
 }
