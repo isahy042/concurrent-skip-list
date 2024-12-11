@@ -8,7 +8,6 @@
 #include <thread>
 #include <unistd.h>
 
-
 #define MAX_SIZE 10000
 
 void random_ops(std::shared_ptr<SkipList> skip_list, int num_ops) {
@@ -83,17 +82,37 @@ void test_correctness_concurrent(std::shared_ptr<SkipList> skip_list, int num_th
 }
 
 
-void test_performance(std::shared_ptr<SkipList> skip_list, int num_threads) {
+void test_performance(std::shared_ptr<SkipList> skip_list, int num_threads, int num_ops) {
+    std::cout << "Running concurrent correctness test on skip list with " << num_threads << " threads and " << num_ops << " operations..." << std::endl;
+    // Each thread will perform a set of random ops and then we will validate the skip list at the end
+    std::vector<std::thread> threads;
 
+    // Start timer
+    auto start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < num_threads; i++) {
+        threads.push_back(std::thread(random_ops, skip_list, num_ops / num_threads));
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double> elapsed = end - start;
+
+    std::cout << "All operations complete, validating skip list..." << std::endl;
+    skip_list->validate();
+    std::cout << "Elapsed time: " << elapsed.count() << "s\n";
 }
 
 int main(int argc, char *argv[]) {
     char testing_mode = '1';
     char skip_list_mode = '1';
     int num_threads = 1;
+    int num_ops = 10000;
 
     int opt;
-    while ((opt = getopt(argc, argv, "t:m:n:")) != -1) {
+    while ((opt = getopt(argc, argv, "t:m:n:o:")) != -1) {
         switch (opt) {
             case 't':
                 testing_mode = *optarg;
@@ -104,8 +123,11 @@ int main(int argc, char *argv[]) {
             case 'n':
                 num_threads = atoi(optarg);
                 break;
+            case 'o':
+                num_ops = atoi(optarg);
+                break;
             default:
-                std::cerr << "Usage: " << argv[0] << " -t testing_mode -m skip_list_mode [-n num_threads]\n";
+                std::cerr << "Usage: " << argv[0] << " -t testing_mode -m skip_list_mode -o number_of_operations [-n num_threads]\n";
                 exit(EXIT_FAILURE);
         }
     }
@@ -131,11 +153,11 @@ int main(int argc, char *argv[]) {
     }
 
     if (testing_mode == '1') {
-        test_correctness_synchronous(skip_list, MAX_SIZE);
+        test_correctness_synchronous(skip_list, num_ops);
     } else if (testing_mode == '2') {
-        test_correctness_concurrent(skip_list, num_threads, MAX_SIZE);
+        test_correctness_concurrent(skip_list, num_threads, num_ops);
     } else if (testing_mode == '3') {
-        // test_performance
+        test_performance(skip_list, num_threads, num_ops);
     } else {
         std::cerr << "Invalid testing mode. Please choose from 1, 2, or 3.\n";
         exit(EXIT_FAILURE);
