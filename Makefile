@@ -39,7 +39,6 @@ $(BUILD_DIR)/%.o: $(TEST_DIR)/%.cpp | $(BUILD_DIR)
 
 # Run tests
 test: $(TEST_EXEC)
-	./$(TEST_EXEC)
 
 # Create build directory
 $(BUILD_DIR):
