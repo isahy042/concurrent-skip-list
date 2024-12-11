@@ -15,7 +15,7 @@ void random_ops(std::shared_ptr<SkipList> skip_list, int num_ops) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> opDist(0, 1);
-    std::uniform_int_distribution<> valueDist(0, MAX_SIZE);
+    std::uniform_int_distribution<> valueDist(0, MAX_SIZE / 2);
 
     for (int i = 0; i < num_ops; i++) {
         int op = opDist(gen);

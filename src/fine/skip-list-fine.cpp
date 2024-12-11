@@ -2,6 +2,7 @@
 #include <cassert>
 #include <memory>
 #include <mutex>
+#include <thread>
 
 FineSkipList::FineSkipList(int total_elements) {
     max_levels_ = std::max(1, static_cast<int>(std::ceil(std::log2(total_elements))));
@@ -53,9 +54,8 @@ bool FineSkipList::insert(int key) {
     std::vector<std::shared_ptr<FineNode>> preds(max_levels_);
     std::vector<std::shared_ptr<FineNode>> succs(max_levels_);
 
-    std::vector<std::unique_lock<std::mutex>> locks;
-
     while (true) {
+        std::vector<std::unique_lock<std::mutex>> locks;
         int l_found = find_node(key, preds, succs);
         if (l_found != -1) {
             auto node_found = succs[l_found];
@@ -68,16 +68,16 @@ bool FineSkipList::insert(int key) {
         
         std::shared_ptr<FineNode> pred, succ, prev_pred = nullptr;
         bool valid = true;
-
+        
         for(int layer = 0; valid && layer <= top_layer; layer++) {
             pred = preds[layer];
             succ = succs[layer];
 
-            if (pred != prev_pred) {
+            if (pred.get() != prev_pred.get()) {
                 locks.push_back(std::unique_lock<std::mutex>(pred->lock_));
                 prev_pred = pred;
             }
-            valid = !pred->marked_ && !succ->marked_ && pred->next_[layer] == succ;
+            valid = !pred->marked_ && !succ->marked_ && pred->next_[layer].get() == succ.get();
         }
 
         if (!valid) continue;
@@ -101,9 +101,8 @@ bool FineSkipList::remove(int key) {
     std::vector<std::shared_ptr<FineNode>> preds(max_levels_);
     std::vector<std::shared_ptr<FineNode>> succs(max_levels_);
 
-    std::vector<std::unique_lock<std::mutex>> locks;
-
     while (true) {
+        std::vector<std::unique_lock<std::mutex>> locks;
         int l_found = find_node(key, preds, succs);
         if (is_marked || (l_found != -1 && ok_to_delete(succs[l_found], l_found))) {
             if (!is_marked) {
@@ -121,15 +120,15 @@ bool FineSkipList::remove(int key) {
 
             std::shared_ptr<FineNode> pred, succ, prev_pred = nullptr;
             bool valid = true;
-            for (int layer = 0; layer <= top_layer; layer++) {
+            for (int layer = 0; valid && (layer <= top_layer); layer++) {
                 pred = preds[layer];
                 succ = succs[layer];
 
-                if (pred != prev_pred) {
+                if (pred.get() != prev_pred.get()) {
                     locks.push_back(std::unique_lock<std::mutex>(pred->lock_));
                     prev_pred = pred;
                 }
-                valid = !pred->marked_ && pred->next_[layer] == succ;
+                valid = !pred->marked_ && pred->next_[layer].get() == succ.get();
             }
 
             if (!valid) continue;

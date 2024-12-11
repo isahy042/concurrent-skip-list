@@ -25,6 +25,9 @@ target_include_directories(skip-list PRIVATE ${SRC_DIR})
 add_executable(skip-list-test ${TEST_FILES} ${SRC_FILES})
 target_include_directories(skip-list-test PRIVATE ${SRC_DIR})
 
+set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0 -DDEBUG")
+
 # Link libatomic to both targets
 target_link_libraries(skip-list PRIVATE atomic)
 target_link_libraries(skip-list-test PRIVATE atomic)
