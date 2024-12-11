@@ -69,8 +69,15 @@ void test_correctness_concurrent(std::shared_ptr<SkipList> skip_list, int num_th
     std::cout << "Running concurrent correctness test on skip list with " << num_threads << " threads and " << num_ops << " operations..." << std::endl;
     // Each thread will perform a set of random ops and then we will validate the skip list at the end
     std::vector<std::thread> threads;
+    // We will partition the number of operations across all threads
     for (int i = 0; i < num_threads; i++) {
-        threads.push_back(std::thread(random_ops, skip_list, num_ops / num_threads));
+        int ops_per_thread = (num_ops + num_threads - 1) / num_threads;
+
+        if (i == num_threads - 1) {
+            ops_per_thread = num_ops - (num_threads - 1) * ops_per_thread;
+        }
+
+        threads.push_back(std::thread(random_ops, skip_list, ops_per_thread));
     }
 
     for (auto& t : threads) {

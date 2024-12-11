@@ -211,7 +211,6 @@ LockFreeNodePair LockFreeSkipList::search_right(float val, LockFreeNode* curr_no
 LockFreeNodePair LockFreeSkipList::insert_node(LockFreeNode* new_node, LockFreeNode* prev_node, LockFreeNode* next_node){
    
     if (prev_node->key == new_node->key){
-        std::cout << "prev_node->key == new_node->key. Duplication detected Initially. \n" << std::flush;
         return {prev_node, new LockFreeNode(RNode::DUPLICATE_KEY)};
     }
 
@@ -244,7 +243,6 @@ LockFreeNodePair LockFreeSkipList::insert_node(LockFreeNode* new_node, LockFreeN
         prev_node = pair.first;
         next_node = pair.second;
         if (prev_node->key == new_node->key){
-            std::cout << prev_node->key << " prev_node->key == new_node->key. Duplication detected. \n" << std::flush;
             return {prev_node, new LockFreeNode(RNode::DUPLICATE_KEY)};
         }
     }
