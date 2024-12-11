@@ -60,7 +60,7 @@ void Checker::RunOperations(std::vector<Operation>& ops){
         break;
 
         }
-        std::cout << "\n";
+        if (verbose) std::cout << "\n";
         // Validate the list
 
         // if (verbose){
