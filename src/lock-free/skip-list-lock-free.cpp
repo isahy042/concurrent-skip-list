@@ -108,6 +108,7 @@ bool LockFreeSkipList::insert(int val){
 }
 
 bool LockFreeSkipList::remove(int val){
+
     LockFreeNodePair pair = search_to_level(val - EPISLON, 1); // TODO: shold be val - epi
 
     if (pair.second->key != val)
@@ -128,14 +129,12 @@ void LockFreeSkipList::validate() {
     auto curr = head; // head points to the root of the tower
     
     for (int layer = 0; layer < max_levels_ ; layer++) {
-        LockFreeNode* temp_curr = curr;
 
-        if (layer > 0) {
-            curr = curr->up;
-        }
+        LockFreeNode* temp_curr = curr;
 
         while(temp_curr) {
             // First check the node below is the same
+
             if (temp_curr->down) {
                 ASSERT_MSG(temp_curr->down->key == temp_curr->key, "Node below is not the same");
             }
@@ -146,6 +145,8 @@ void LockFreeSkipList::validate() {
             }
             temp_curr = temp_curr->get_right();
         }
+
+        curr = curr->up;
     }
 
     std::cout << "Validation successful" << std::endl;
@@ -160,7 +161,6 @@ LockFreeNodePair LockFreeSkipList::search_to_level(float val, int level){
         LockFreeNodePair pair = search_right(val, curr_node);
         curr_node = pair.first->down;
         curr_v --;
-        
         
     }
 
@@ -183,15 +183,17 @@ std::pair<LockFreeNode*, int> LockFreeSkipList::find_start(int level){
 
 LockFreeNodePair LockFreeSkipList::search_right(float val, LockFreeNode* curr_node){
     LockFreeNode* next_node = curr_node->get_right();
+
     while(next_node->key <= val){
 
         // tower superfluous, delete next_node
-        while (next_node->tower_root->get_mark() == true){ 
+        while (next_node->tower_root && next_node->tower_root->get_mark() == true){ 
             FlagTuple try_flag_tuple = try_flag_node(curr_node, next_node);
             curr_node = try_flag_tuple.node;
             if (try_flag_tuple.status == NodeStatus::IN) help_flagged(curr_node, next_node); // next_node's pred was flagged
             // keep going right until no longer superfluous
             next_node = curr_node->get_right();
+
         }
 
         // proceed searching normally

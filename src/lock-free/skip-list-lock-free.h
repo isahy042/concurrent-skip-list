@@ -18,7 +18,7 @@ const float EPISLON = 0.01f;
 struct LockFreeNode {
 
     struct  Succ{
-      LockFreeNode* right;
+      LockFreeNode* right = nullptr;
       unsigned int mark = 0;
       unsigned int flag = 0;
       //bool padding[6];
@@ -33,12 +33,12 @@ struct LockFreeNode {
 
     RNode type = RNode::VALID; 
 
-    LockFreeNode* back_link; // if a node is not (about to be) marked deleted, this is null
+    LockFreeNode* back_link = nullptr; // if a node is not (about to be) marked deleted, this is null
     
-    LockFreeNode* down;
-    LockFreeNode* up; // only used by head node
+    LockFreeNode* down = nullptr;
+    LockFreeNode* up = nullptr; // only used by head node
 
-    LockFreeNode* tower_root;
+    LockFreeNode* tower_root = nullptr;
 
     int key;
 
